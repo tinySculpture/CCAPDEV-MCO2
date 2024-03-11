@@ -14,7 +14,7 @@ const TextEditor = () => {
       }}
     >
       <MDEditor value={editorText} onChange={() => {setEditorText}}
-        data-color-mode="light"
+        data-color-mode="dark"
         hideToolbar={false}
         preview="edit"
         visibleDragbar={false}

@@ -5,12 +5,13 @@ import Home from "./Home";
 import Index from "./Index";
 
 import "bootstrap/dist/css/bootstrap.css";
+import "./scss/main.scss";
+
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import UserPost from "./UserPost.jsx";
 import Profile from "./Profile";
 import Login from "./Login";
-// npm run dev -> Run server
-// npx vite -> Run vite server
+import Signup from "./Signup";
 
 export class PostContent {
   id: number;
@@ -42,6 +43,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         
         <Route path="/home" element={<Home postList={postList} />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
         
         {/* Show a user */}
         <Route

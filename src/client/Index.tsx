@@ -10,7 +10,7 @@ const Index = () => {
     axios.get("/").then((res) => {
       console.log(res)
 
-      navigate("/home")
+      navigate("/login")
       
     }).catch((error) => {
       console.log(error)
