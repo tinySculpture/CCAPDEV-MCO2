@@ -12,6 +12,7 @@ import UserPost from "./UserPost.jsx";
 import Profile from "./Profile";
 import Login from "./Login";
 import Signup from "./Signup";
+import CreatePost from "./CreatePost";
 
 export class PostContent {
   id: number;
@@ -44,6 +45,8 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         <Route path="/home" element={<Home postList={postList} />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+
+        <Route path="/create" element={<CreatePost />} />
         
         {/* Show a user */}
         <Route

@@ -9,7 +9,7 @@ const Home = (props: {postList: Array<PostContent>}) => {
 
   const [posts, setPosts] = useState(props.postList)
   useEffect(() => {
-    axios.get("/home").then((res) => {
+    axios.get("").then((res) => {
       // get posts from database
     });
   });

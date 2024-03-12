@@ -1,6 +1,6 @@
 import { IconContext } from "react-icons";
 import mainLogo from "../assets/LOGO1.png";
-import { MdAccountCircle } from "react-icons/md";
+import { MdAccountCircle, MdAccountBox  } from "react-icons/md";
 import { Link, NavLink } from "react-router-dom";
 import { useState } from "react";
 
@@ -38,7 +38,7 @@ const Navbar = (
               isLoggedIn ?
               <Link to="/user/@username"className="nav-item nav-link active">
                 <IconContext.Provider value={{ size: "2.5em" }}>
-                  <MdAccountCircle />
+                  <MdAccountBox />
                 </IconContext.Provider>
               </Link>
               : null

@@ -31,3 +31,15 @@ __TODO__
 - [ ] Sign-up page front-end
 - [ ] Import mongodb database
 - [ ] Add Functionality for each page
+
+post {
+  comments: [
+    uid: {
+      uid: ""
+      text: "",
+      userid: "",
+      createdAt: "",
+      votes: ""
+    }
+  ]
+}
