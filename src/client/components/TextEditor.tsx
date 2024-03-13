@@ -1,25 +1,31 @@
-import { useState } from "react";
 import MDEditor, { commands } from '@uiw/react-md-editor';
 
 // Markdown editor component
-const TextEditor = () => {
+const TextEditor = (props: {
+  editorText: string
+  setEditorText: React.Dispatch<React.SetStateAction<string>>,
+  placeholder: string
+}) => {
 
-  const [editorText, setEditorText] = useState("")
+  const handleChange = (value: string) => {
+    props.setEditorText(value)
+  }
 
   return(
     <div
       className="card"
       style={{
-        padding: "20px"
+        padding: "20px",
+        marginBottom: "10px"
       }}
     >
-      <MDEditor value={editorText} onChange={() => {setEditorText}}
+      <MDEditor value={props.editorText} onChange={(value) => { handleChange(value || "")}}
         data-color-mode="dark"
         hideToolbar={false}
         preview="edit"
         visibleDragbar={false}
         textareaProps={{
-          placeholder: "Add a comment..."
+          placeholder: props.placeholder
         }}
         style={{
           marginBottom: "10px"
@@ -48,7 +54,6 @@ const TextEditor = () => {
             
           ]}
       />
-      <button type="button" className="btn btn-primary align-self-start">Submit</button>
     </div>
   )
 }

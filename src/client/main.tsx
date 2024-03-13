@@ -13,27 +13,7 @@ import Profile from "./Profile";
 import Login from "./Login";
 import Signup from "./Signup";
 import CreatePost from "./CreatePost";
-
-export class PostContent {
-  id: number;
-  title: string;
-  content: string;
-  username: string;
-  voteCount: number = 0;
-
-  constructor(id: number, title: string, content: string, username: string) {
-    this.id = id
-    this.title = title
-    this.content = content
-    this.username = username
-  }
-}
-
-var postList: PostContent[] = []
-
-for (let i = 0; i < 5; i++) {
-  postList.push(new PostContent(i, `Post Title A${i + 1}`, "Post Content", `@username${i}`))
-}
+import EditPost from "./EditPost";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
@@ -42,11 +22,15 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         {/* Main path */}
         <Route path="/" element={<Index />} />
         
-        <Route path="/home" element={<Home postList={postList} />} />
+        <Route path="/home" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
         <Route path="/create" element={<CreatePost />} />
+        <Route
+          path="/edit/:id"
+          element={<EditPost />}
+        />
         
         {/* Show a user */}
         <Route

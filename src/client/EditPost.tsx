@@ -1,18 +1,32 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Navbar from "./components/Navbar"
 import TextEditor from "./components/TextEditor"
 import axios from "axios"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 
-const CreatePost = () => {
+const EditPost = () => {
+  const {id} = useParams()
   const [titleText, setTitleText] = useState("")
   const [editorText, setEditorText] = useState("")
   const navigate = useNavigate()
 
+  useEffect(() => {
+    axios.get("http://localhost:3000/editpost", {
+      params: {
+        id: id
+      }
+    })
+    .then((res) => {
+      setTitleText(res.data.title)
+      setEditorText(res.data.editorText)
+    })
+  }, [])
+
   const handleSubmit = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    axios.post("http://localhost:3000/create", {
-      title: titleText,
-      body: editorText
+    axios.post("http://localhost:3000/edit", {
+      params: {
+        id: id
+      }
     })
     .then((res) => {
       navigate("/home")
@@ -44,4 +58,4 @@ const CreatePost = () => {
   )
 }
 
-export default CreatePost
+export default EditPost

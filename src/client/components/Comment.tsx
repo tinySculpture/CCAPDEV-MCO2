@@ -2,24 +2,68 @@ import { useState } from "react";
 import pfp from "../assets/user-pfp.png"
 import { IconContext } from "react-icons";
 import { BiDownvote, BiUpvote, BiComment } from "react-icons/bi";
+import { Link } from "react-router-dom";
+import moment from "moment"
 
 import "../css/custom-styles.css"
+import axios from "axios";
 
 const Comment = (
   props: {
+    id: string,
     username: string,
-    title: string,
     content: string,
+    date: Date,
+    upvotes: any[],
+    downvotes: any[],
+    currentUserID: string
   }
 ) => {
 
   const [username, setUsername] = useState(props.username)
-  const [title, setTitle] = useState(props.title)
   const [content, setContent] = useState(props.content)
-  const [voteCount, setVoteCount] = useState(0)
+  const [voteCount, setVoteCount] = useState(props.upvotes.length - props.downvotes.length)
+  const [isUpvoted, setIsUpvoted] = useState(false)
+  const [isDownvoted, setIsDownvoted] = useState(false)
+
+  const updateVotes = () => {
+    axios.post("/api/updateVote", {
+      postID: props.id,
+      currentUserID: props.currentUserID,
+      isUpvoted: isUpvoted,
+      isDownvoted: isDownvoted
+    })
+    .then((res) => {
+
+    })
+  }
 
   const updateCount = (count: number) => {
-    setVoteCount(voteCount + count)
+    if (count === 1) {
+      props.upvotes.map((vote) => {
+        if (props.currentUserID === vote._id) {
+          setIsUpvoted(true)
+          setIsDownvoted(false)
+        }
+      })
+
+      if (!isUpvoted) {
+        setVoteCount(voteCount + count)
+      }
+    } else {
+      props.downvotes.map((vote) => {
+        if (props.currentUserID === vote._id) {
+          setIsDownvoted(true)
+          setIsUpvoted(false)
+        }
+      })
+
+      if (!isDownvoted) {
+        setVoteCount(voteCount + count)
+      }
+    }
+
+    updateVotes()
   };
 
   return(
@@ -29,15 +73,17 @@ const Comment = (
           <img style={{"width": "100%", "height": "100%"}} src={pfp} />
         </picture>
         
-        <a href="#" style={{"marginRight": "10px"}}>username</a>
-        <span>01/10/2022</span>
+        <Link to={`/user/${username}`} style={{ marginRight: 10 }}>
+            {username}
+        </Link>
+        <span>{moment(props.date).format("MMMM D, YYYY")}</span>
         
         <div className="d-md-flex d-lg-flex justify-content-md-end justify-content-lg-end" style={{"width": "100%", "display": "flex"}}>
           <span className="bs-icon-sm bs-icon-rounded bs-icon-primary d-flex justify-content-center align-items-center me-2 bs-icon" style={{"marginRight": "0px"}}></span>
         </div>
       </div>
 
-      <p style={{"margin": "5px 0px"}}>Nullam id dolor id nibh ultricies vehicula ut id elit. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus.</p>
+      <p style={{"margin": "5px 0px"}}>{content}</p>
 
       {/* like and comment */}
       <div
