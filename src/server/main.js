@@ -22,7 +22,9 @@ mongoose.connect(db_url)
 app.get("/api/posts", (req, res) => {
   PostModel
   .find()
+  .populate("userID")
   .then((posts) => {
+    console.log(posts)
     res.json(posts)
   }).catch((err) => {
     res.json(err)
@@ -47,18 +49,19 @@ app.post("/signup", async (req, res) => {
 
   try {
     await data.save()
+    res.send("")
   } catch {
     console.log(err)
+    res.send("")
   }
 })
 
-app.post("/api/login", async (req, res) => {
-  try {
-    const user = await UserModel.findOne({username: req.body.username})
+app.post("/login", (req, res) => {
+  UserModel.findOne({username: req.body.username})
+  .then((user) => {
     const uid = user._id
     const username = user.username
     const role = user.role
-
     if (user.password === req.body.password) {
       const token = jwt.sign({
         uid, username, role
@@ -68,12 +71,15 @@ app.post("/api/login", async (req, res) => {
         httpOnly: true,
         sameSite: true
       })
+
+      res.send("")
     } else {
-      console.log("Error")
+      console.log("Nothing")
     }
-  } catch(err) {
+  })
+  .catch((err) => {
     console.log(err)
-  }
+  })
 })
 
 app.get("/api/currentUser", (req, res) => {
@@ -84,6 +90,27 @@ app.get("/api/currentUser", (req, res) => {
     res.send(user)
   } catch(err) {
     res.clearCookie("token")
+  }
+})
+
+app.post("/create", async (req, res) => {
+  const token = req.cookies.token
+  const user = jwt.verify(token, process.env.SECRET_KEY)
+
+  const post = new PostModel({
+    userID: user.uid,
+    title: req.body.title,
+    body: req.body.body,
+    votes: 0,
+    createdAt: Date.now(),
+    comments: []
+  })
+
+  try {
+    await post.save()
+    res.send("Success.")
+  } catch (err) {
+    console.log(err)
   }
 })
 

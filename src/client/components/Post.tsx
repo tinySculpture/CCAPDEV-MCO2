@@ -2,6 +2,7 @@ import { useState } from "react";
 import { IconContext } from "react-icons";
 import { BiUpvote, BiDownvote, BiComment } from "react-icons/bi";
 import { Link } from "react-router-dom";
+import moment from "moment"
 
 import "../css/custom-styles.css"
 
@@ -10,7 +11,8 @@ const Post = (
     username: string,
     title: string,
     content: string,
-    isViewing?: boolean
+    date: Date,
+    isViewing?: boolean,
   }
 ) => {
 
@@ -45,8 +47,8 @@ const Post = (
           <Link to={`/user/${username}`} style={{ marginRight: 10 }}>
             {username}
           </Link>
-          <span>01/10/2022</span>
-          <div
+          <span>{moment(props.date).format("MMMM D, YYYY")}</span>
+          {/* <div
             className="d-md-flex d-lg-flex justify-content-md-end justify-content-lg-end"
             style={{ width: "100%", display: "flex" }}
           >
@@ -54,7 +56,7 @@ const Post = (
               className="bs-icon-sm bs-icon-rounded bs-icon-primary d-flex justify-content-center align-items-center me-2 bs-icon"
               style={{ marginRight: 0 }}
             ></span>
-          </div>
+          </div> */}
         </div>
 
         {/* title and content */}

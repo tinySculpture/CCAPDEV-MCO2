@@ -26,7 +26,7 @@ const Home = () => {
         {
           posts.map((post) => {
             return(
-              <Post key={post._id}  title={post.title} content={post.body} username={"post.username"} isViewing={false} />
+              <Post key={post._id}  title={post.title} content={post.body} username={post.userID.username} date={post.createdAt} isViewing={false} />
             )
           })
         }

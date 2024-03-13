@@ -15,11 +15,12 @@ const Navbar = (
   const [username, setUsername] = useState("")
 
   useEffect(() => {
-    axios.get("/api/currentUser")
-    .then((user) => {
-      console.log(user.data)
-      setUsername(user.data.username)
-    })
+    if (isLoggedIn) {
+      axios.get("/api/currentUser")
+      .then((user) => {
+        setUsername(user.data.username)
+      })
+    }
   })
 
   return (
@@ -46,7 +47,7 @@ const Navbar = (
           <ul className="navbar-nav ms-auto">
             {
               isLoggedIn ?
-              <Link to={`/user/${username}`} className="nav-item nav-link active">
+              <Link to={`/user/@${username}`} className="nav-item nav-link active">
                 <IconContext.Provider value={{ size: "2.5em" }}>
                   <MdAccountBox />
                 </IconContext.Provider>
