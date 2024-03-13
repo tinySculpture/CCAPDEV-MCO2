@@ -146,6 +146,38 @@ app.post("/create", async (req, res) => {
   }
 })
 
+/* Delete Post */ 
+app.delete("/api/posts/:_id", async (req, res) => {
+  const postId = req.params._id;
+
+  try {
+    const deletedPost = await PostModel.findByIdAndDelete(postId);
+    if (!deletedPost) {
+      return res.status(404).json({ message: "Post not found." });
+    }
+    res.json({ message: "Post deleted successfully.", deletedPost });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error deleting post." });
+  }
+})
+
+/* Update Post */
+app.put("/api/posts/:_id", async (req, res) => {
+  const postId = req.params._id;
+
+  try {
+    const updatedPost = await PostModel.findByIdAndUpdate(postId, req.body, { new: true });
+    if (!updatedPost) {
+      return res.status(404).json({ message: "Post not found." });
+    }
+    res.json({ message: "Post updated successfully.", updatedPost });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error updating post." });
+  }
+})
+
 app.get("/post", (req, res) => {
   const currentUser = getCurrentUser(req)
 
@@ -169,7 +201,6 @@ app.get("/post", (req, res) => {
   .catch((err) => {
     res.json(err)
   })
-
 })
 
 app.get("/logout", (req, res) => {
