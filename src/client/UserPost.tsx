@@ -16,8 +16,7 @@ const UserPost = () => {
     body: "",
     userID: {} as any,
     createdAt: new Date(),
-    upvotes: [{} as any],
-    downvotes: [{} as any]
+    votes: [{} as any],
   })
 
   const [currentUserID, setCurrentUserID] = useState("")
@@ -43,7 +42,7 @@ const UserPost = () => {
       <Navbar />
       
       <div className="container" style={{ maxWidth: "85%" }}>
-        <Post key={post._id} id={post._id} title={post.title} content={post.body} username={post.userID.username} date={post.createdAt} upvotes={post.upvotes} downvotes={post.downvotes} currentUserID={currentUserID} isViewing={true} />
+        <Post key={post._id} id={post._id} title={post.title} content={post.body} username={post.userID.username} date={post.createdAt} votes={post.votes} currentUserID={currentUserID} isViewing={true} />
         <TextEditor editorText={editorText} setEditorText={setEditorText} placeholder="Add a comment..." />
 
         <div style={{"margin": "10px 0px", "padding": "0px 20px"}}>
