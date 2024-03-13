@@ -151,14 +151,14 @@ app.delete("/api/posts/:_id", async (req, res) => {
   const postId = req.params._id;
 
   try {
-    const deletedPost = await PostModel.findByIdAndDelete(postId);
+    const deletedPost = await PostModel.findByIdAndDelete(postId)
     if (!deletedPost) {
-      return res.status(404).json({ message: "Post not found." });
+      return res.status(404).json({ message: "Post not found." })
     }
-    res.json({ message: "Post deleted successfully.", deletedPost });
+    res.json({ message: "Post deleted successfully.", deletedPost })
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Error deleting post." });
+    res.status(500).json({ message: "Error deleting post." })
   }
 })
 
@@ -167,14 +167,14 @@ app.put("/api/posts/:_id", async (req, res) => {
   const postId = req.params._id;
 
   try {
-    const updatedPost = await PostModel.findByIdAndUpdate(postId, req.body, { new: true });
+    const updatedPost = await PostModel.findByIdAndUpdate(postId, req.body, { new: true })
     if (!updatedPost) {
-      return res.status(404).json({ message: "Post not found." });
+      return res.status(404).json({ message: "Post not found." })
     }
-    res.json({ message: "Post updated successfully.", updatedPost });
+    res.json({ message: "Post updated successfully.", updatedPost })
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Error updating post." });
+    res.status(500).json({ message: "Error updating post." })
   }
 })
 
@@ -227,6 +227,82 @@ app.get("/logout", (req, res) => {
 //     }, done)
 //   }
 // })
+
+/* Comment */
+app.post("/api/posts/:postId/comments", async (req, res) => {
+  const { postId } = req.params;
+  const { content } = req.body;
+
+  try {
+    const post = await PostModel.findById(postId);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found." })
+    }
+
+    const comment = new CommentModel ({
+      content: req.body.body,
+      createdAt: Date.now(),
+      commentorID: user.uid,
+      votes: 0
+    })
+
+    post.comments.push(comment)
+    await post.save()
+
+    res.json({ message: "Comment added successfully.", comment })
+  } catch (err) {
+    console.log(err)
+  }
+})
+
+/* Update Comment */
+app.put("/api/posts/:postId/comments/:commentId", async (req, res) => {
+  const { postId, commentId } = req.params
+  const { content } = req.body
+
+  try {
+    const post = await PostModel.findById(postId)
+    if (!post) {
+      return res.status(404).json({ message: "Post not found." })
+    }
+
+    const comment = post.comments.id(commentId);
+    if (!comment) {
+      return res.status(404).json({ message: "Comment not found." })
+    }
+
+    comment.content = content;
+    await comment.save();
+
+    res.json({ message: "Comment updated successfully.", comment })
+  } catch (err) {
+    console.log(err)
+  }
+})
+
+/* Delete Comment */
+app.delete("/api/posts/:postId/comments/:commentId", async (req, res) => {
+  const { postId, commentId } = req.params;
+
+  try {
+    const post = await PostModel.findById(postId)
+    if (!post) {
+      return res.status(404).json({ message: "Post not found." })
+    }
+
+    const comment = post.comments.id(commentId);
+    if (!comment) {
+      return res.status(404).json({ message: "Comment not found." })
+    }
+
+    comment.remove()
+    await post.save()
+
+    res.json({ message: "Comment deleted successfully." })
+  } catch (err) {
+    console.log(err)
+  }
+})
 
 ViteExpress.listen(app, PORT, () =>
   console.log("Server is listening on port 3000..."),
