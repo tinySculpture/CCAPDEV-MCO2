@@ -148,7 +148,7 @@ app.post("/create", async (req, res) => {
 
 /* Delete Post */ 
 app.delete("/api/posts/:_id", async (req, res) => {
-  const postId = req.params._id;
+  const postId = req.params._id
 
   try {
     const deletedPost = await PostModel.findByIdAndDelete(postId)
@@ -164,7 +164,7 @@ app.delete("/api/posts/:_id", async (req, res) => {
 
 /* Update Post */
 app.put("/api/posts/:_id", async (req, res) => {
-  const postId = req.params._id;
+  const postId = req.params._id
 
   try {
     const updatedPost = await PostModel.findByIdAndUpdate(postId, req.body, { new: true })
@@ -230,8 +230,8 @@ app.get("/logout", (req, res) => {
 
 /* Comment */
 app.post("/api/posts/:postId/comments", async (req, res) => {
-  const { postId } = req.params;
-  const { content } = req.body;
+  const { postId } = req.params
+  const { content } = req.body
 
   try {
     const post = await PostModel.findById(postId);
@@ -266,12 +266,12 @@ app.put("/api/posts/:postId/comments/:commentId", async (req, res) => {
       return res.status(404).json({ message: "Post not found." })
     }
 
-    const comment = post.comments.id(commentId);
+    const comment = post.comments.id(commentId)
     if (!comment) {
       return res.status(404).json({ message: "Comment not found." })
     }
 
-    comment.content = content;
+    comment.content = content
     await comment.save();
 
     res.json({ message: "Comment updated successfully.", comment })
@@ -282,7 +282,7 @@ app.put("/api/posts/:postId/comments/:commentId", async (req, res) => {
 
 /* Delete Comment */
 app.delete("/api/posts/:postId/comments/:commentId", async (req, res) => {
-  const { postId, commentId } = req.params;
+  const { postId, commentId } = req.params
 
   try {
     const post = await PostModel.findById(postId)
@@ -290,7 +290,7 @@ app.delete("/api/posts/:postId/comments/:commentId", async (req, res) => {
       return res.status(404).json({ message: "Post not found." })
     }
 
-    const comment = post.comments.id(commentId);
+    const comment = post.comments.id(commentId)
     if (!comment) {
       return res.status(404).json({ message: "Comment not found." })
     }
