@@ -8,8 +8,6 @@ const Index = () => {
   
   useEffect(() => {
     axios.get("/").then((res) => {
-      console.log(res)
-
       navigate("/login")
       
     }).catch((error) => {
