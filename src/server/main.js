@@ -1,25 +1,30 @@
 import express from "express";
 import ViteExpress from "vite-express";
-import cors from "cors"
+import path from "path";
+import { fileURLToPath } from 'url';
 
 import connectDB from "./database.js";
-import PostModel from "./models/schemas.js";
 
 const PORT = 3000
-
 const app = express();
 
-app.use(express.json())
-app.use(cors())
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename)
+
+app.use(express.static(path.join(__dirname, "dist")))
+
+const test = {
+  name: "test",
+  price: 120,
+}
+
+const router = express.Router()
+app.use("/api/posts", router.get("/api/posts", (req, res) => {
+  res.send(test)
+}))
+
+connectDB()
 
 ViteExpress.listen(app, PORT, () =>
   console.log("Server is listening on port 3000..."),
 );
-
-app.get("/api/posts", async (req, res) => {
-  const posts = await PostModel.find()
-
-  res.json(posts)
-})
-
-connectDB()

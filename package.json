@@ -5,7 +5,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "nodemon src/server/main.ts -w src/server",
+    "dev": "nodemon src/server/main.js -w src/server",
     "start": "cross-env NODE_ENV=production node src/server/main.js",
     "build": "tsc && vite build"
   },

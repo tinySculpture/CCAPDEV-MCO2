@@ -28,13 +28,14 @@ for (let i = 0; i < 5; i++) {
 
 const Home = () => {
   const [posts, setPosts] = useState(postList)
+  const [test, setTest] = useState()
 
   useEffect(() => {
-    axios.get("/api/home").then((res) => {
-      // get posts from database
-      console.log(res)
-      console.log("Test")
-    });
+    fetch("/api/posts").then((res) => {
+      res.json()
+    }).then((data: any) => {
+      console.log(data)
+    })
   }, []);
 
   return (
