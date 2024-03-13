@@ -69,22 +69,12 @@ app.post("/api/login", async (req, res) => {
         sameSite: true
       })
     } else {
-      res.send("Invalid password")
+      console.log("Error")
     }
   } catch(err) {
-    res.send("Invalid username")
+    console.log(err)
   }
 })
-
-// const validateToken = (req, res) => {
-//   const token = req.cookies.token
-//   try {
-//     const user = jwt.verify(token, process.env.SECRET_KEY) 
-//     req.user = user
-//   } catch(err) {
-//     res.clearCookie("token")
-//   }
-// }
 
 app.get("/api/currentUser", (req, res) => {
   const token = req.cookies.token
@@ -94,7 +84,6 @@ app.get("/api/currentUser", (req, res) => {
     res.send(user)
   } catch(err) {
     res.clearCookie("token")
-    res.send("/")
   }
 })
 
