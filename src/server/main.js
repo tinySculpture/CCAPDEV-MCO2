@@ -147,36 +147,59 @@ app.post("/create", async (req, res) => {
 })
 
 /* Delete Post */ 
-app.delete("/api/posts/:_id", async (req, res) => {
-  const postId = req.params._id;
+app.delete("/post", async (req, res) => {
+  const currentUser = getCurrentUser(req)
 
-  try {
-    const deletedPost = await PostModel.findByIdAndDelete(postId);
-    if (!deletedPost) {
-      return res.status(404).json({ message: "Post not found." });
-    }
-    res.json({ message: "Post deleted successfully.", deletedPost });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error deleting post." });
-  }
+  UserModel.findOne({username: req.query.username})
+  .then((user) => {
+    PostModel.findOne({
+      userID: {
+        _id: user._id
+      },
+      title: req.query.title.split('_').join(' ')
+    })
+    .then((post) => {
+      PostModel.findByIdAndDelete(post._id)
+      .then((del) => {
+        res.send("Deleted successfully.")
+      })
+      .catch((err) => {
+        res.json(err)
+      })
+    }).catch((err) => {
+      res.json(err)
+    })
+  })
+  .catch((err) => {
+    res.json(err)
+  })
 })
 
 /* Update Post */
-app.put("/api/posts/:_id", async (req, res) => {
-  const postId = req.params._id;
+// app.put("/edit", async (req, res) => {
+//   const postId = req.query.id;
 
-  try {
-    const updatedPost = await PostModel.findByIdAndUpdate(postId, req.body, { new: true });
-    if (!updatedPost) {
-      return res.status(404).json({ message: "Post not found." });
-    }
-    res.json({ message: "Post updated successfully.", updatedPost });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error updating post." });
-  }
-})
+//   try {
+//     const updatedPost = await PostModel.findByIdAndUpdate(postId, req.body, { new: true });
+//     if (!updatedPost) {
+//       return res.status(404).json({ message: "Post not found." });
+//     }
+//     res.json({ message: "Post updated successfully.", updatedPost });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Error updating post." });
+//   }
+// })
+
+// app.get("/editpost", (req, res) => {
+//   const postId = req.query.id;
+
+//   console.log(postId)
+//   UserModel.findById(postId)
+//   .then((post) => {
+//     res.json(post)
+//   })
+// })
 
 app.get("/post", (req, res) => {
   const currentUser = getCurrentUser(req)
@@ -207,26 +230,6 @@ app.get("/logout", (req, res) => {
   res.clearCookie("token")
   res.send("Logged out")
 })
-
-// app.post("/updateVote", (req, res) => {
-//   if (req.body.isUpvoted) {
-//     PostModel.update({
-//       _id: req.body._id
-//     }, {
-//       $push: {
-//         votes: req.body.currentUserID
-//       }
-//     }, done)
-//   } else if (req.body.isDownvoted) {
-//     PostModel.update({
-//       _id: req.body._id
-//     }, {
-//       $pull: {
-//         votes: req.body.currentUserID
-//       }
-//     }, done)
-//   }
-// })
 
 ViteExpress.listen(app, PORT, () =>
   console.log("Server is listening on port 3000..."),

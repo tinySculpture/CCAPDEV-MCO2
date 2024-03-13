@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { IconContext } from "react-icons";
 import { BiUpvote, BiDownvote, BiComment } from "react-icons/bi";
-import { Link } from "react-router-dom";
+import { FaTrash, FaEdit  } from "react-icons/fa";
+import { Link, useNavigate } from "react-router-dom";
 import moment from "moment"
 
 import "../css/custom-styles.css"
@@ -14,9 +15,10 @@ const Post = (
     title: string,
     content: string,
     date: Date,
-    isViewing?: boolean,
     votes: any[],
     currentUserID: string
+    isViewing?: boolean,
+    isOwner?: boolean,
   }
 ) => {
 
@@ -24,32 +26,17 @@ const Post = (
   const [title, setTitle] = useState(props.title)
   const [content, setContent] = useState(props.content)
   const [isViewing, setIsViewing] = useState(props.isViewing || false)
+  const [isOwner, setIsOwner] = useState(props.isOwner || false)
   const [voteCount, setVoteCount] = useState(props.votes.length)
   const [isVoted, setIsVoted] = useState(false)
 
-  // const updateVotes = () => {
-  //   axios.post("/api/updateVote", {
-  //     postID: props.id,
-  //     currentUserID: props.currentUserID,
-  //     isVoted: isVoted,
-  //   })
-  //   .then((res) => {
-
-  //   })
-  // }
+  const navigate = useNavigate()
 
   const updateCount = (count: number) => {
-    props.votes.map((vote) => {
-      if (props.currentUserID === vote._id) {
-        setIsVoted(true)
-      }
-    })
-
     if (!isVoted) {
       setVoteCount(voteCount + count)
+      setIsVoted(true)
     }
-
-    // updateVotes()
   };
 
   const checkIfViewing = () => {
@@ -64,25 +51,58 @@ const Post = (
     }
   }
 
+  const checkIfOwner = () => {
+    if (!isOwner) {
+      return null
+    }
+
+    function handleEdit(): void {
+      navigate(`/edit/${props.id}`)
+    }
+
+    function handleDelete(): void {
+      if (confirm("Are you sure you want to delete your post forever?")) {
+        axios.delete("http://localhost:3000/post", {
+          params: {
+            username: username,
+            title: title
+          }
+        })
+        .then((res) => {
+          navigate(-1)
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+      }
+    }
+
+    return(
+      <div
+        className="d-md-flex d-lg-flex justify-content-md-end justify-content-lg-end"
+        style={{ width: "100px", display: "flex"}}
+      >
+        <IconContext.Provider value={{ size: "1em" }}>
+          <FaEdit  onClick={() => handleEdit()} style={{marginRight: "10px"}}/>
+          <FaTrash onClick={() => handleDelete()}/>
+        </IconContext.Provider>
+      </div>
+    )
+  }
+
   return (
     <div className="card" style={{ marginBottom: "10px" }}>
       <div className="card-body">
 
         {/* metadata */}
-        <div className="onTop" style={{ width: "auto", display: "flex" }}>
-          <Link to={`/user/${username}`} style={{ marginRight: 10 }}>
-            {username}
-          </Link>
-          <span>{moment(props.date).format("MMMM D, YYYY")}</span>
-          {/* <div
-            className="d-md-flex d-lg-flex justify-content-md-end justify-content-lg-end"
-            style={{ width: "100%", display: "flex" }}
-          >
-            <span
-              className="bs-icon-sm bs-icon-rounded bs-icon-primary d-flex justify-content-center align-items-center me-2 bs-icon"
-              style={{ marginRight: 0 }}
-            ></span>
-          </div> */}
+        <div className="onTop" style={{ width: "auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div>
+            <Link to={`/user/${username}`} style={{ marginRight: 10 }}>
+              {username}
+            </Link>
+            <span>{moment(props.date).format("MMMM D, YYYY")}</span>
+          </div>
+          {checkIfOwner()}
         </div>
 
         {/* title and content */}

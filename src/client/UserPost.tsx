@@ -37,12 +37,19 @@ const UserPost = () => {
     })
   }, [])
 
+  const checkIfOwner = () => {
+    if (currentUserID == post.userID._id) {
+      return true
+    }
+    return false
+  }
+
   return(
     <div>
       <Navbar />
       
       <div className="container" style={{ maxWidth: "85%" }}>
-        <Post key={post._id} id={post._id} title={post.title} content={post.body} username={post.userID.username} date={post.createdAt} votes={post.votes} currentUserID={currentUserID} isViewing={true} />
+        <Post key={post._id} id={post._id} title={post.title} content={post.body} username={post.userID.username} date={post.createdAt} votes={post.votes} currentUserID={currentUserID} isViewing={true} isOwner={checkIfOwner()}/>
         <TextEditor editorText={editorText} setEditorText={setEditorText} placeholder="Add a comment..." />
 
         <div style={{"margin": "10px 0px", "padding": "0px 20px"}}>

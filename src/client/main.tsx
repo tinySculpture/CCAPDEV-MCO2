@@ -13,6 +13,7 @@ import Profile from "./Profile";
 import Login from "./Login";
 import Signup from "./Signup";
 import CreatePost from "./CreatePost";
+import EditPost from "./EditPost";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
@@ -26,6 +27,10 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         <Route path="/signup" element={<Signup />} />
 
         <Route path="/create" element={<CreatePost />} />
+        <Route
+          path="/edit/:id"
+          element={<EditPost />}
+        />
         
         {/* Show a user */}
         <Route

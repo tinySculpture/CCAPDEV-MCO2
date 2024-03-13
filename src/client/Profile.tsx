@@ -71,7 +71,7 @@ const Profile = () => {
     let postList: React.ReactElement[] = []
     posts.map((post) => {
       postList.push(
-        <Post key={post._id} id={post._id} title={post.title} content={post.body} username={post.userID.username} date={post.createdAt} currentUserID={currentUserID} votes={post.votes} isViewing={false} />
+        <Post key={post._id} id={post._id} title={post.title} content={post.body} username={post.userID.username} date={post.createdAt} currentUserID={currentUserID} votes={post.votes} isViewing={false} isOwner={isOwner} />
       )
     })
 
