@@ -5,14 +5,19 @@ import { Link } from "react-router-dom";
 import moment from "moment"
 
 import "../css/custom-styles.css"
+import axios from "axios";
 
 const Post = (
   props: {
+    id: string,
     username: string,
     title: string,
     content: string,
     date: Date,
     isViewing?: boolean,
+    upvotes: any[],
+    downvotes: any[],
+    currentUserID: string
   }
 ) => {
 
@@ -20,10 +25,48 @@ const Post = (
   const [title, setTitle] = useState(props.title)
   const [content, setContent] = useState(props.content)
   const [isViewing, setIsViewing] = useState(props.isViewing || false)
-  const [voteCount, setVoteCount] = useState(0)
+  const [voteCount, setVoteCount] = useState(props.upvotes.length - props.downvotes.length)
+  const [isUpvoted, setIsUpvoted] = useState(false)
+  const [isDownvoted, setIsDownvoted] = useState(false)
+
+  const updateVotes = () => {
+    axios.post("/api/updateVote", {
+      postID: props.id,
+      currentUserID: props.currentUserID,
+      isUpvoted: isUpvoted,
+      isDownvoted: isDownvoted
+    })
+    .then((res) => {
+
+    })
+  }
 
   const updateCount = (count: number) => {
-    setVoteCount(voteCount + count)
+    if (count === 1) {
+      props.upvotes.map((vote) => {
+        if (props.currentUserID === vote._id) {
+          setIsUpvoted(true)
+          setIsDownvoted(false)
+        }
+      })
+
+      if (!isUpvoted) {
+        setVoteCount(voteCount + count)
+      }
+    } else {
+      props.downvotes.map((vote) => {
+        if (props.currentUserID === vote._id) {
+          setIsDownvoted(true)
+          setIsUpvoted(false)
+        }
+      })
+
+      if (!isDownvoted) {
+        setVoteCount(voteCount + count)
+      }
+    }
+
+    updateVotes()
   };
 
   const checkIfViewing = () => {

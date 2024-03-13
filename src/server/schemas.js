@@ -13,7 +13,7 @@ const CommentSchema = new Schema({
   body: String,
   createdAt: Date,
   commentorID: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: UserModel
   }
 })
@@ -26,7 +26,12 @@ const PostSchema = new Schema({
   },
   title: String,
   body: String,
-  votes: Number,
+  votes: [{
+    voter: {
+      type: Schema.Types.ObjectId,
+      ref: UserModel,
+    }
+  }],
   createdAt: Date,
   comments: [{
     commentID: {

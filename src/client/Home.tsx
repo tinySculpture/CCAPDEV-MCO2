@@ -7,11 +7,13 @@ import axios from "axios";
 const Home = () => {
 
   const [posts, setPosts] = useState<any[]>([])
+  const [currentUserID, setCurrentUserID] = useState("")
 
   useEffect(() => {
     axios.get("http://localhost:3000/api/posts")
-    .then((posts) => {
-      setPosts(posts.data)
+    .then((res) => {
+      setPosts(res.data.posts)
+      setCurrentUserID(res.data.currentUser.uid)
     })
     .catch((err) => {
       console.log(err)
@@ -26,7 +28,7 @@ const Home = () => {
         {
           posts.map((post) => {
             return(
-              <Post key={post._id}  title={post.title} content={post.body} username={post.userID.username} date={post.createdAt} isViewing={false} />
+              <Post key={post._id} id={post._id} title={post.title} content={post.body} username={post.userID.username} date={post.createdAt} currentUserID={currentUserID} upvotes={post.votes} downvotes={post.downvotes} isViewing={false} />
             )
           })
         }

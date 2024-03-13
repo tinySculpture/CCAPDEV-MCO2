@@ -20,12 +20,16 @@ app.use(cookieParser())
 mongoose.connect(db_url)
 
 app.get("/api/posts", (req, res) => {
+  const token = req.cookies.token
+  const currentUser = jwt.verify(token, process.env.SECRET_KEY)
+
   PostModel
   .find()
   .populate("userID")
   .then((posts) => {
-    console.log(posts)
-    res.json(posts)
+    res.send(JSON.stringify({
+      posts, currentUser
+    }))
   }).catch((err) => {
     res.json(err)
   })
@@ -111,6 +115,59 @@ app.post("/create", async (req, res) => {
     res.send("Success.")
   } catch (err) {
     console.log(err)
+  }
+})
+
+app.get("/post", (req, res) => {
+  const token = req.cookies.token
+  const currentUser = jwt.verify(token, process.env.SECRET_KEY)
+
+  UserModel.findOne({username: req.query.username})
+  .then((user) => {
+    PostModel.findOne({
+      userID: {
+        _id: user._id
+      },
+      title: req.query.title
+    })
+    .populate("userID")
+    .then((post) => {
+      res.send(JSON.stringify({
+        post, currentUser
+      }))
+    }).catch((err) => {
+      res.json(err)
+    })
+  })
+  .catch((err) => {
+    res.json(err)
+  })
+
+})
+
+app.post("/updateVote", (req, res) => {
+  if (req.body.isUpvoted) {
+    PostModel.update({
+      _id: req.body._id
+    }, {
+      $push: {
+        upvotes: req.body.currentUserID
+      },
+      $pull: {
+        downvotes: req.body.currentUserID
+      }
+    }, done)
+  } else if (req.body.isDownvoted) {
+    PostModel.update({
+      _id: req.body._id
+    }, {
+      $push: {
+        downvotes: req.body.currentUserID
+      },
+      $pull: {
+        upvotes: req.body.currentUserID
+      }
+    }, done)
   }
 })
 
