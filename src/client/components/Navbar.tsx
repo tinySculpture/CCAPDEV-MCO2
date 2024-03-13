@@ -2,7 +2,8 @@ import { IconContext } from "react-icons";
 import mainLogo from "../assets/LOGO1.png";
 import { MdAccountCircle, MdAccountBox  } from "react-icons/md";
 import { Link, NavLink } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 const Navbar = (
   props: {
@@ -11,6 +12,15 @@ const Navbar = (
 ) => {
   // if no login status is given, assume a user is logged in
   const [isLoggedIn, setisLoggedIn] = useState(props.isLoggedIn === undefined ? true : props.isLoggedIn)
+  const [username, setUsername] = useState("")
+
+  useEffect(() => {
+    axios.get("/api/currentUser")
+    .then((user) => {
+      console.log(user.data)
+      setUsername(user.data.username)
+    })
+  })
 
   return (
     <nav className="navbar navbar-expand-md bg-body py-3">
@@ -36,7 +46,7 @@ const Navbar = (
           <ul className="navbar-nav ms-auto">
             {
               isLoggedIn ?
-              <Link to="/user/@username"className="nav-item nav-link active">
+              <Link to={`/user/${username}`} className="nav-item nav-link active">
                 <IconContext.Provider value={{ size: "2.5em" }}>
                   <MdAccountBox />
                 </IconContext.Provider>

@@ -12,7 +12,6 @@ const Home = () => {
     axios.get("http://localhost:3000/api/posts")
     .then((posts) => {
       setPosts(posts.data)
-      console.log(posts.data)
     })
     .catch((err) => {
       console.log(err)

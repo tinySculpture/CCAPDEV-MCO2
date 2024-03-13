@@ -9,7 +9,6 @@ const Index = () => {
   useEffect(() => {
     axios.get("/").then((res) => {
       navigate("/login")
-      
     }).catch((error) => {
       console.log(error)
       return (
