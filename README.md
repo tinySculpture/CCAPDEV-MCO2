@@ -12,7 +12,7 @@
 2. Open the folder and type `npm install` into the terminal to install all relevant packages.
   - If you get errors where some packages are not installed, install them manually. 
   - If you add packages, make sure `package.json` and `package-lock.json` files are updated, and notify everyone so we can download the modules added.
-  - (BTW there's like at least 5k files in node_modules when you download the packages, so don't delete the .gitignore file)
+  - BTW there's like at least 5k files in node_modules when you download the packages, so don't delete the .gitignore file
 3. To start the project, just type in `npm run dev` to run the server at `localhost:3000`
 4. That's pretty much it, glhf
 ---
@@ -26,6 +26,6 @@ __Notes__ _(Feel free to add stuff)_
 
 __TODO__
 
-- [ ] Sign-up page front-end
+- [ ] Sign-up page front-end, field validation
 - [ ] Import mongodb database
 - [ ] Add Functionality for each page
