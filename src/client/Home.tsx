@@ -20,17 +20,32 @@ const Home = () => {
     })
   }, [])
 
+  const checkPosts = () => {
+    if (posts === undefined || posts.length === 0) {
+      return(
+        <div style={{textAlign: "center"}}>
+          Nothing to see here
+        </div>
+      )
+    }
+
+    let postList: React.ReactElement[] = []
+    posts.map((post) => {
+      postList.push(
+        <Post key={post._id} id={post._id} title={post.title} content={post.body} username={post.userID.username} date={post.createdAt} currentUserID={currentUserID} votes={post.votes} isViewing={false} />
+      )
+    })
+
+    return postList
+  }
+
   return (
     <div>
       <Navbar />
       {/* Posts list container */}
       <div className="container" style={{ maxWidth: "85%" }}>
         {
-          posts.map((post) => {
-            return(
-              <Post key={post._id} id={post._id} title={post.title} content={post.body} username={post.userID.username} date={post.createdAt} currentUserID={currentUserID} upvotes={post.votes} downvotes={post.downvotes} isViewing={false} />
-            )
-          })
+          checkPosts()
         }
       </div>
     </div>

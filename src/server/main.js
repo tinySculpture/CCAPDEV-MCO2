@@ -19,18 +19,47 @@ app.use(cookieParser())
 
 mongoose.connect(db_url)
 
-app.get("/api/posts", (req, res) => {
+const getCurrentUser = (req) => {
   const token = req.cookies.token
   const currentUser = jwt.verify(token, process.env.SECRET_KEY)
+  return currentUser
+}
 
-  PostModel
-  .find()
+app.get("/api/posts", (req, res) => {
+  const currentUser = getCurrentUser(req)
+
+  PostModel.find({})
   .populate("userID")
   .then((posts) => {
     res.send(JSON.stringify({
       posts, currentUser
     }))
   }).catch((err) => {
+    res.json(err)
+  })
+})
+
+app.get("/api/user", (req, res) => {
+  const currentUser = getCurrentUser(req)
+
+  UserModel.findOne({username: req.query.username})
+  .then((user) => {
+    
+    PostModel.find({
+      userID: {
+        _id: user._id
+      }
+    })
+    .populate("userID")
+    .then((posts) => {
+      res.send(JSON.stringify({
+        posts, user, currentUser,
+      }))
+    }).catch((err) => {
+      res.json(err)
+    })
+  })
+  .catch((err) => {
     res.json(err)
   })
 })
@@ -76,7 +105,7 @@ app.post("/login", (req, res) => {
         sameSite: true
       })
 
-      res.send("")
+      res.send("Token sent")
     } else {
       console.log("Nothing")
     }
@@ -98,14 +127,13 @@ app.get("/api/currentUser", (req, res) => {
 })
 
 app.post("/create", async (req, res) => {
-  const token = req.cookies.token
-  const user = jwt.verify(token, process.env.SECRET_KEY)
+  const currentUser = getCurrentUser(req)
 
   const post = new PostModel({
-    userID: user.uid,
+    userID: currentUser.uid,
     title: req.body.title,
     body: req.body.body,
-    votes: 0,
+    votes: [currentUser],
     createdAt: Date.now(),
     comments: []
   })
@@ -119,8 +147,7 @@ app.post("/create", async (req, res) => {
 })
 
 app.get("/post", (req, res) => {
-  const token = req.cookies.token
-  const currentUser = jwt.verify(token, process.env.SECRET_KEY)
+  const currentUser = getCurrentUser(req)
 
   UserModel.findOne({username: req.query.username})
   .then((user) => {
@@ -128,7 +155,7 @@ app.get("/post", (req, res) => {
       userID: {
         _id: user._id
       },
-      title: req.query.title
+      title: req.query.title.split('_').join(' ')
     })
     .populate("userID")
     .then((post) => {
@@ -145,31 +172,30 @@ app.get("/post", (req, res) => {
 
 })
 
-app.post("/updateVote", (req, res) => {
-  if (req.body.isUpvoted) {
-    PostModel.update({
-      _id: req.body._id
-    }, {
-      $push: {
-        upvotes: req.body.currentUserID
-      },
-      $pull: {
-        downvotes: req.body.currentUserID
-      }
-    }, done)
-  } else if (req.body.isDownvoted) {
-    PostModel.update({
-      _id: req.body._id
-    }, {
-      $push: {
-        downvotes: req.body.currentUserID
-      },
-      $pull: {
-        upvotes: req.body.currentUserID
-      }
-    }, done)
-  }
+app.get("/logout", (req, res) => {
+  res.clearCookie("token")
+  res.send("Logged out")
 })
+
+// app.post("/updateVote", (req, res) => {
+//   if (req.body.isUpvoted) {
+//     PostModel.update({
+//       _id: req.body._id
+//     }, {
+//       $push: {
+//         votes: req.body.currentUserID
+//       }
+//     }, done)
+//   } else if (req.body.isDownvoted) {
+//     PostModel.update({
+//       _id: req.body._id
+//     }, {
+//       $pull: {
+//         votes: req.body.currentUserID
+//       }
+//     }, done)
+//   }
+// })
 
 ViteExpress.listen(app, PORT, () =>
   console.log("Server is listening on port 3000..."),
