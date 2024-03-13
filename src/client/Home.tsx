@@ -1,18 +1,41 @@
 import Navbar from "./components/Navbar";
 import Post from "./components/Post";
-import {PostContent} from "./main"
 
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { MongoClient } from "mongodb";
 
-const Home = (props: {postList: Array<PostContent>}) => {
+class PostContent {
+  id: number;
+  title: string;
+  content: string;
+  username: string;
+  voteCount: number = 0;
 
-  const [posts, setPosts] = useState(props.postList)
+  constructor(id: number, title: string, content: string, username: string) {
+    this.id = id
+    this.title = title
+    this.content = content
+    this.username = username
+  }
+}
+
+var postList: PostContent[] = []
+
+for (let i = 0; i < 5; i++) {
+  postList.push(new PostContent(i, `Post Title A${i + 1}`, "Post Content", `@username${i}`))
+}
+
+const Home = () => {
+  const [posts, setPosts] = useState(postList)
+
   useEffect(() => {
-    axios.get("").then((res) => {
+    axios.get("/api/home").then((res) => {
       // get posts from database
+      console.log(res)
+      console.log("Test")
     });
-  });
+  }, []);
 
   return (
     <div>
