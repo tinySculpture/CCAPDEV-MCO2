@@ -17,15 +17,19 @@ const EditPost = () => {
       }
     })
     .then((res) => {
+      console.log(res.data)
       setTitleText(res.data.title)
-      setEditorText(res.data.editorText)
+      setEditorText(res.data.body)
     })
   }, [])
 
   const handleSubmit = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    event.preventDefault()
     axios.post("http://localhost:3000/edit", {
       params: {
-        id: id
+        id: id,
+        title: titleText,
+        body: editorText
       }
     })
     .then((res) => {
@@ -41,7 +45,7 @@ const EditPost = () => {
       <Navbar />
       
       <div className="container" style={{ maxWidth: "85%" }}>
-        <h2 style={{fontWeight: "bold"}}>Create Post</h2>
+        <h2 style={{fontWeight: "bold"}}>Edit Post</h2>
         <div>
           <input type="text" className="form-control" placeholder="Title"
             style={{
@@ -49,6 +53,7 @@ const EditPost = () => {
               marginBottom: "10px"
             }}
             onChange={(e) => setTitleText(e.target.value)}
+            value={titleText}
           />
           <TextEditor editorText={editorText} setEditorText={setEditorText} placeholder="Say something..." />
           <button type="button" className="btn btn-primary align-self-start" onClick={(e) => handleSubmit(e)}>Submit</button>

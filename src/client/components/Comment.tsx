@@ -14,56 +14,20 @@ const Comment = (
     username: string,
     content: string,
     date: Date,
-    upvotes: any[],
-    downvotes: any[],
-    currentUserID: string
+    votes: any[],
   }
 ) => {
 
   const [username, setUsername] = useState(props.username)
   const [content, setContent] = useState(props.content)
-  const [voteCount, setVoteCount] = useState(props.upvotes.length - props.downvotes.length)
-  const [isUpvoted, setIsUpvoted] = useState(false)
-  const [isDownvoted, setIsDownvoted] = useState(false)
-
-  const updateVotes = () => {
-    axios.post("/api/updateVote", {
-      postID: props.id,
-      currentUserID: props.currentUserID,
-      isUpvoted: isUpvoted,
-      isDownvoted: isDownvoted
-    })
-    .then((res) => {
-
-    })
-  }
+  const [voteCount, setVoteCount] = useState(props.votes.length)
+  const [isVoted, setIsVoted] = useState(false)
 
   const updateCount = (count: number) => {
-    if (count === 1) {
-      props.upvotes.map((vote) => {
-        if (props.currentUserID === vote._id) {
-          setIsUpvoted(true)
-          setIsDownvoted(false)
-        }
-      })
-
-      if (!isUpvoted) {
-        setVoteCount(voteCount + count)
-      }
-    } else {
-      props.downvotes.map((vote) => {
-        if (props.currentUserID === vote._id) {
-          setIsDownvoted(true)
-          setIsUpvoted(false)
-        }
-      })
-
-      if (!isDownvoted) {
-        setVoteCount(voteCount + count)
-      }
+    if (!isVoted) {
+      setVoteCount(voteCount + count)
+      setIsVoted(true)
     }
-
-    updateVotes()
   };
 
   return(
