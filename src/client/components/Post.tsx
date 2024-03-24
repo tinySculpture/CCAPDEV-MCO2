@@ -16,7 +16,6 @@ const Post = (
     content: string,
     date: Date,
     votes: any[],
-    currentUserID: string
     isViewing?: boolean,
     isOwner?: boolean,
   }

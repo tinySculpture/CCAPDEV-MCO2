@@ -3,11 +3,11 @@ import ViteExpress from "vite-express";
 import db, { db_url } from "./database.js";
 import cors from "cors";
 import mongoose from "mongoose";
-import { PostModel, UserModel } from "./schemas.js";
-import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 import "dotenv/config";
+
 import userRouter from "./routes/user-routes.js";
+import postRouter from "./routes/post-routes.js";
 
 
 const PORT = 3000;
@@ -22,268 +22,252 @@ app.use(cookieParser());
 mongoose.connect(db_url);
 
 app.use(userRouter)
+app.use(postRouter)
 
-const getCurrentUser = (req) => {
-  const token = req.cookies.token;
-  const currentUser = jwt.verify(token, process.env.SECRET_KEY);
-  return currentUser;
-};
+// const getCurrentUser = (req) => {
+//   const token = req.cookies.token;
+//   const currentUser = jwt.verify(token, process.env.SECRET_KEY);
+//   return currentUser;
+// };
 
-app.get("/api/posts", async (req, res) => {
-  const currentUser = getCurrentUser(req);
+// app.get("/api/user", (req, res) => {
+//   const currentUser = getCurrentUser(req);
 
-  try {
-    const posts = await PostModel.find({}).lean().exec();
-    res.send(
-      JSON.stringify({
-        posts,
-        currentUser,
-      })
-    );
-  } catch (err) {
-    console.log(err);
-    res.sendStatus(500);
-  }
-});
+//   UserModel.findOne({ username: req.query.username })
+//     .then((user) => {
+//       PostModel.find({
+//         userID: {
+//           _id: user._id,
+//         },
+//       })
+//         .populate("userID")
+//         .then((posts) => {
+//           res.send(
+//             JSON.stringify({
+//               posts,
+//               user,
+//               currentUser,
+//             })
+//           );
+//         })
+//         .catch((err) => {
+//           res.json(err);
+//         });
+//     })
+//     .catch((err) => {
+//       res.json(err);
+//     });
+// });
 
-app.get("/api/user", (req, res) => {
-  const currentUser = getCurrentUser(req);
+// app.get("/api/users", (req, res) => {
+//   UserModel.find().then((users) => {
+//     res.json(users);
+//   });
+// });
 
-  UserModel.findOne({ username: req.query.username })
-    .then((user) => {
-      PostModel.find({
-        userID: {
-          _id: user._id,
-        },
-      })
-        .populate("userID")
-        .then((posts) => {
-          res.send(
-            JSON.stringify({
-              posts,
-              user,
-              currentUser,
-            })
-          );
-        })
-        .catch((err) => {
-          res.json(err);
-        });
-    })
-    .catch((err) => {
-      res.json(err);
-    });
-});
+// app.get("/api/currentUser", (req, res) => {
+//   const token = req.cookies.token;
+//   try {
+//     const user = jwt.verify(token, process.env.SECRET_KEY);
+//     req.user = user;
+//     res.send(user);
+//   } catch (err) {
+//     res.clearCookie("token");
+//   }
+// });
 
-app.get("/api/users", (req, res) => {
-  UserModel.find().then((users) => {
-    res.json(users);
-  });
-});
+// app.post("/create", async (req, res) => {
+//   const currentUser = getCurrentUser(req);
 
-app.get("/api/currentUser", (req, res) => {
-  const token = req.cookies.token;
-  try {
-    const user = jwt.verify(token, process.env.SECRET_KEY);
-    req.user = user;
-    res.send(user);
-  } catch (err) {
-    res.clearCookie("token");
-  }
-});
+//   const post = new PostModel({
+//     userID: currentUser.uid,
+//     title: req.body.title,
+//     body: req.body.body,
+//     votes: [currentUser],
+//     createdAt: Date.now(),
+//     comments: [],
+//   });
 
-app.post("/create", async (req, res) => {
-  const currentUser = getCurrentUser(req);
+//   try {
+//     await post.save();
+//     res.send("Success.");
+//   } catch (err) {
+//     console.log(err);
+//   }
+// });
 
-  const post = new PostModel({
-    userID: currentUser.uid,
-    title: req.body.title,
-    body: req.body.body,
-    votes: [currentUser],
-    createdAt: Date.now(),
-    comments: [],
-  });
+// /* Delete Post */
+// app.delete("/post", async (req, res) => {
+//   const currentUser = getCurrentUser(req);
 
-  try {
-    await post.save();
-    res.send("Success.");
-  } catch (err) {
-    console.log(err);
-  }
-});
+//   UserModel.findOne({ username: req.query.username })
+//     .then((user) => {
+//       PostModel.findOne({
+//         userID: {
+//           _id: user._id,
+//         },
+//         title: req.query.title.split("_").join(" "),
+//       })
+//         .then((post) => {
+//           PostModel.findByIdAndDelete(post._id)
+//             .then((del) => {
+//               res.send("Deleted successfully.");
+//             })
+//             .catch((err) => {
+//               res.json(err);
+//             });
+//         })
+//         .catch((err) => {
+//           res.json(err);
+//         });
+//     })
+//     .catch((err) => {
+//       res.json(err);
+//     });
+// });
 
-/* Delete Post */
-app.delete("/post", async (req, res) => {
-  const currentUser = getCurrentUser(req);
+// /* Update Post */
+// app.post("/edit", async (req, res) => {
+//   const postId = req.query.id;
 
-  UserModel.findOne({ username: req.query.username })
-    .then((user) => {
-      PostModel.findOne({
-        userID: {
-          _id: user._id,
-        },
-        title: req.query.title.split("_").join(" "),
-      })
-        .then((post) => {
-          PostModel.findByIdAndDelete(post._id)
-            .then((del) => {
-              res.send("Deleted successfully.");
-            })
-            .catch((err) => {
-              res.json(err);
-            });
-        })
-        .catch((err) => {
-          res.json(err);
-        });
-    })
-    .catch((err) => {
-      res.json(err);
-    });
-});
+//   const result = await PostModel.findOneAndUpdate(
+//     { _id: postId },
+//     {
+//       title: req.body.title,
+//       body: req.body.body,
+//     }
+//   );
+// });
 
-/* Update Post */
-app.post("/edit", async (req, res) => {
-  const postId = req.query.id;
+// app.get("/editpost", (req, res) => {
+//   const postId = req.query.id;
 
-  const result = await PostModel.findOneAndUpdate(
-    { _id: postId },
-    {
-      title: req.body.title,
-      body: req.body.body,
-    }
-  );
-});
+//   console.log(postId);
+//   PostModel.findOne({ _id: postId })
+//     .then((post) => {
+//       res.send(post);
+//     })
+//     .catch((err) => {
+//       console.log(err);
+//     });
+// });
 
-app.get("/editpost", (req, res) => {
-  const postId = req.query.id;
+// app.get("/post", async (req, res) => {
+//   const currentUser = getCurrentUser(req);
+//   console.log(req.body);
+//   // const realTitle = req.body.title
+//   console.log(req.query);
 
-  console.log(postId);
-  PostModel.findOne({ _id: postId })
-    .then((post) => {
-      res.send(post);
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-});
+//   await UserModel.findOne({ username: req.query.username })
+//     .then((user) => {
+//       PostModel.findOne({
+//         title: req.query.title,
+//       }).then((post) => console.log(post));
 
-app.get("/post", async (req, res) => {
-  const currentUser = getCurrentUser(req);
-  console.log(req.body);
-  // const realTitle = req.body.title
-  console.log(req.query);
+//       PostModel.findOne({
+//         userID: {
+//           _id: user._id,
+//         },
+//         title: title,
+//       })
+//         .populate("userID")
+//         .then((post) => {
+//           res.send(
+//             JSON.stringify({
+//               post,
+//               currentUser,
+//             })
+//           );
+//         })
+//         .catch((err) => {
+//           res.json(err);
+//         });
+//     })
+//     .catch((err) => {
+//       res.json(err);
+//     });
+// });
 
-  await UserModel.findOne({ username: req.query.username })
-    .then((user) => {
-      PostModel.findOne({
-        title: req.query.title,
-      }).then((post) => console.log(post));
+// app.get("/logout", (req, res) => {
+//   res.clearCookie("token");
+//   res.send("Logged out");
+// });
 
-      PostModel.findOne({
-        userID: {
-          _id: user._id,
-        },
-        title: title,
-      })
-        .populate("userID")
-        .then((post) => {
-          res.send(
-            JSON.stringify({
-              post,
-              currentUser,
-            })
-          );
-        })
-        .catch((err) => {
-          res.json(err);
-        });
-    })
-    .catch((err) => {
-      res.json(err);
-    });
-});
+// /* Comment */
+// app.post("/comment", async (req, res) => {
+//   const currentUser = getCurrentUser(req);
+//   const postId = req.query.postId;
 
-app.get("/logout", (req, res) => {
-  res.clearCookie("token");
-  res.send("Logged out");
-});
+//   try {
+//     const post = await PostModel.findOne({ _id: postId });
+//     if (!post) {
+//       return res.status(404).json({ message: "Post not found." });
+//     }
 
-/* Comment */
-app.post("/comment", async (req, res) => {
-  const currentUser = getCurrentUser(req);
-  const postId = req.query.postId;
+//     const comment = new CommentModel({
+//       content: req.query.body,
+//       createdAt: Date.now(),
+//       commentorID: currentUser.uid,
+//       votes: 0,
+//     });
 
-  try {
-    const post = await PostModel.findOne({ _id: postId });
-    if (!post) {
-      return res.status(404).json({ message: "Post not found." });
-    }
+//     post.comments.push(comment);
+//     await post.save();
 
-    const comment = new CommentModel({
-      content: req.query.body,
-      createdAt: Date.now(),
-      commentorID: currentUser.uid,
-      votes: 0,
-    });
+//     res.json({ message: "Comment added successfully.", comment });
+//   } catch (err) {
+//     console.log(err);
+//   }
+// });
 
-    post.comments.push(comment);
-    await post.save();
+// /* Update Comment */
+// app.put("/api/posts/:postId/comments/:commentId", async (req, res) => {
+//   const { postId, commentId } = req.params;
+//   const { content } = req.body;
 
-    res.json({ message: "Comment added successfully.", comment });
-  } catch (err) {
-    console.log(err);
-  }
-});
+//   try {
+//     const post = await PostModel.findById(postId);
+//     if (!post) {
+//       return res.status(404).json({ message: "Post not found." });
+//     }
 
-/* Update Comment */
-app.put("/api/posts/:postId/comments/:commentId", async (req, res) => {
-  const { postId, commentId } = req.params;
-  const { content } = req.body;
+//     const comment = post.comments.id(commentId);
+//     if (!comment) {
+//       return res.status(404).json({ message: "Comment not found." });
+//     }
 
-  try {
-    const post = await PostModel.findById(postId);
-    if (!post) {
-      return res.status(404).json({ message: "Post not found." });
-    }
+//     comment.content = content;
+//     await comment.save();
 
-    const comment = post.comments.id(commentId);
-    if (!comment) {
-      return res.status(404).json({ message: "Comment not found." });
-    }
+//     res.json({ message: "Comment updated successfully.", comment });
+//   } catch (err) {
+//     console.log(err);
+//   }
+// });
 
-    comment.content = content;
-    await comment.save();
+// /* Delete Comment */
+// app.delete("/api/posts/:postId/comments/:commentId", async (req, res) => {
+//   const { postId, commentId } = req.params;
 
-    res.json({ message: "Comment updated successfully.", comment });
-  } catch (err) {
-    console.log(err);
-  }
-});
+//   try {
+//     const post = await PostModel.findById(postId);
+//     if (!post) {
+//       return res.status(404).json({ message: "Post not found." });
+//     }
 
-/* Delete Comment */
-app.delete("/api/posts/:postId/comments/:commentId", async (req, res) => {
-  const { postId, commentId } = req.params;
+//     const comment = post.comments.id(commentId);
+//     if (!comment) {
+//       return res.status(404).json({ message: "Comment not found." });
+//     }
 
-  try {
-    const post = await PostModel.findById(postId);
-    if (!post) {
-      return res.status(404).json({ message: "Post not found." });
-    }
+//     comment.remove();
+//     await post.save();
 
-    const comment = post.comments.id(commentId);
-    if (!comment) {
-      return res.status(404).json({ message: "Comment not found." });
-    }
-
-    comment.remove();
-    await post.save();
-
-    res.json({ message: "Comment deleted successfully." });
-  } catch (err) {
-    console.log(err);
-  }
-});
+//     res.json({ message: "Comment deleted successfully." });
+//   } catch (err) {
+//     console.log(err);
+//   }
+// });
 
 ViteExpress.listen(app, PORT, () =>
   console.log("Server is listening on port 3000...")

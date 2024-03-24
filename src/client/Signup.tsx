@@ -87,7 +87,7 @@ const Signup = () => {
 
   return (
     <div>
-      <Navbar isLoggedIn={false} />
+      <Navbar />
 
       <div className="container d-flex d-lg-flex justify-content-lg-center align-items-lg-center" style={{ height: "100%", display: "flex" }}>
         <div className="card mb-5" style={{ marginBottom: "0px", width: "30%" }}>

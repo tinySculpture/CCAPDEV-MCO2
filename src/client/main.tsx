@@ -15,6 +15,7 @@ import "./scss/main.scss";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import AuthProvider from "react-auth-kit/AuthProvider";
 import store from "../server/utils/authStore";
+import AuthOutlet from "@auth-kit/react-router/AuthOutlet";
 
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
@@ -23,31 +24,32 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
       <BrowserRouter>
         <Routes>
 
-          {/* Main path */}
-          <Route path="/home" element={<Home />} />
-          <Route path="/create" element={<CreatePost />} />
-
-          <Route
-            path="/edit/:id"
-            element={<EditPost />}
-          />
-
-          {/* Show a user */}
-          <Route
-            path="/user/:username"
-            element={<Profile />}
-          />
-
-          {/* Show a post */}
-          <Route
-            path="/post/:username/:id"
-            element={<UserPost />}
-          />
-
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
 
+          {/* Protected routes */}
+          <Route element={<AuthOutlet fallbackPath="/login" />}>
+            <Route path="/home" element={<Home />} />
+            <Route path="/create" element={<CreatePost />} />
+
+            <Route
+              path="/edit/:id"
+              element={<EditPost />}
+            />
+
+            {/* Show a user */}
+            <Route
+              path="/user/:username"
+              element={<Profile />}
+            />
+
+            {/* Show a post */}
+            <Route
+              path="/post/:username/:id"
+              element={<UserPost />}
+            />
+          </Route>
         </Routes>
       </BrowserRouter>
     </AuthProvider>

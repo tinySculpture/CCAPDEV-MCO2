@@ -36,6 +36,7 @@ const Login = () => {
 
   const handleSubmit = async () => {
     try {
+      // dont do anything when there is still an error
       if (errText !== "") {
         return
       }
@@ -46,10 +47,13 @@ const Login = () => {
 
       if (signIn({
         auth: {
-          token: response.data.token
+          token: response.data.token,
+          type: "Bearer"
         },
+        refresh: response.data.refreshToken,
         userState: response.data.user
       })) {
+        //redicrect on sign in
         navigate("/home")
       }
     } catch (err) {
@@ -74,7 +78,7 @@ const Login = () => {
 
   return (
     <div>
-      <Navbar isLoggedIn={false} />
+      <Navbar />
       <div className="container d-flex d-lg-flex justify-content-lg-center align-items-lg-center" style={{ height: "100%", display: "flex" }}>
         <div className="card mb-5" style={{ marginBottom: "0px", width: "30%" }}>
           <div className="card-body d-flex flex-column align-items-center">

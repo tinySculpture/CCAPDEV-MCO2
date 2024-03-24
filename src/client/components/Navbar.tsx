@@ -1,28 +1,30 @@
+// icons
 import { IconContext } from "react-icons";
 import mainLogo from "../assets/LOGO1.png";
-import { MdAccountCircle, MdAccountBox  } from "react-icons/md";
+import { MdAccountCircle } from "react-icons/md";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import axios from "axios";
 
-const Navbar = (
-  props: {
-    isLoggedIn?: boolean
-  }
-) => {
+// hooks
+import { useEffect, useState } from "react";
+import useAuthUser from "react-auth-kit/hooks/useAuthUser"
+import useIsAuthenticated from 'react-auth-kit/hooks/useIsAuthenticated'
+
+//utils
+import http from "../../server/utils/axios"
+import UserType from "../../server/utils/UserType";
+
+const Navbar = () => {
   // if no login status is given, assume a user is logged in
-  const [isLoggedIn, setisLoggedIn] = useState(props.isLoggedIn === undefined ? true : props.isLoggedIn)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [username, setUsername] = useState("")
   const navigate = useNavigate()
+  const auth = useAuthUser<UserType>()
+  const isAuthenticated = useIsAuthenticated()
 
   useEffect(() => {
-    if (isLoggedIn) {
-      axios.get("/api/currentUser")
-      .then((user) => {
-        setUsername(user.data.username)
-      })
-    }
-  })
+    setUsername(auth?.username || "")
+    setIsLoggedIn(isAuthenticated)
+  }, [])
 
   return (
     <nav className="navbar navbar-expand-md bg-body py-3">
@@ -45,19 +47,18 @@ const Navbar = (
         </button>
 
         <div className="collapse navbar-collapse" id="navcol-2">
-          <ul className="navbar-nav ms-auto">
-            <button type="button" className="btn btn-primary align-self-center" onClick={() => navigate("/create")}>Create</button>
-            {
-              isLoggedIn ?
+          {
+            isLoggedIn ?
+            <ul className="navbar-nav ms-auto">
+              <button type="button" className="btn btn-primary align-self-center" onClick={() => navigate("/create")}>Create</button>
               <Link reloadDocument to={`/user/${username}`} className="nav-item nav-link active">
                 <IconContext.Provider value={{ size: "2.5em" }}>
-                  <MdAccountBox />
+                  <MdAccountCircle />
                 </IconContext.Provider>
               </Link>
-              : null
-            }
-            
-          </ul>
+            </ul>
+            : null
+          }
         </div>
       </div>
     </nav>

@@ -1,8 +1,19 @@
 import { Router } from "express";
-const router = Router();
+import { PostModel } from "../schemas.js";
+const postRouter = Router();
 
-router.get((req, res) => {
-	
-})
+postRouter.get("/api/posts", async (req, res) => {
+  try {
+    const posts = await PostModel.find({})
+      .populate("userID")
+      .sort("-createdAt")
+      .lean()
+      .exec();
+    res.send(posts);
+  } catch (err) {
+    console.error(err);
+    res.sendStatus(500);
+  }
+});
 
-export default router;
+export default postRouter;
