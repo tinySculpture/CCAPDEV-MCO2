@@ -34,5 +34,6 @@ __TODO__
 - [ ] user dashboard - where a user can view the posts made & total amount of votes
 - [ ] admin dashboard - see the posts reported, delete reported posts which are deemed  inappropriate by the admin
 - [ ] Sign-up page front-end, field validation
+- [ ] log-in validation (password: salt and hash in mongodb, password and username validation)
 - [ ] Import mongodb database
 - [ ] Add Functionality for each page
