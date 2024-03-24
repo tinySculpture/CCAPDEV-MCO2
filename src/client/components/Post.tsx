@@ -41,7 +41,7 @@ const Post = (
 
   const checkIfViewing = () => {
     if (!isViewing) {
-      return <Link to={`/post/${username}/${title.split(' ').join('_')}`} style={{
+      return <Link to={`/post/${username}/${props.id}`} style={{
         position: "absolute",
         width: "100%",
         height: "100%",

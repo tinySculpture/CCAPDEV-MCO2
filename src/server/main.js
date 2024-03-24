@@ -176,41 +176,46 @@ app.delete("/post", async (req, res) => {
 })
 
 /* Update Post */
-// app.put("/edit", async (req, res) => {
-//   const postId = req.query.id;
+app.post("/edit", async (req, res) => {
+  const postId = req.query.id;
 
-//   try {
-//     const updatedPost = await PostModel.findByIdAndUpdate(postId, req.body, { new: true });
-//     if (!updatedPost) {
-//       return res.status(404).json({ message: "Post not found." });
-//     }
-//     res.json({ message: "Post updated successfully.", updatedPost });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: "Error updating post." });
-//   }
-// })
+  const result = await PostModel.findOneAndUpdate({_id: postId}, {
+    title: req.body.title,
+    body: req.body.body
+  })
 
-// app.get("/editpost", (req, res) => {
-//   const postId = req.query.id;
 
-//   console.log(postId)
-//   UserModel.findById(postId)
-//   .then((post) => {
-//     res.json(post)
-//   })
-// })
+})
 
-app.get("/post", (req, res) => {
+app.get("/editpost", (req, res) => {
+  const postId = req.query.id;
+
+  console.log(postId)
+  PostModel.findOne({_id: postId})
+  .then((post) => {
+    res.send(post)
+  })
+  .catch((err) => {
+    console.log(err)
+  })
+})
+
+app.get("/post", async (req, res) => {
   const currentUser = getCurrentUser(req)
+  const realTitle = req.query.title.split('_').join(' ')
+  console.log(req.query.username)
 
-  UserModel.findOne({username: req.query.username})
+  await UserModel.findOne({username: req.query.username})
   .then((user) => {
+    PostModel.findOne({
+    title: req.query.title,
+    }).then(post => console.log(post))
+
     PostModel.findOne({
       userID: {
         _id: user._id
       },
-      title: req.query.title.split('_').join(' ')
+      title: title,
     })
     .populate("userID")
     .then((post) => {
@@ -231,41 +236,21 @@ app.get("/logout", (req, res) => {
   res.send("Logged out")
 })
 
-// app.post("/updateVote", (req, res) => {
-//   if (req.body.isUpvoted) {
-//     PostModel.update({
-//       _id: req.body._id
-//     }, {
-//       $push: {
-//         votes: req.body.currentUserID
-//       }
-//     }, done)
-//   } else if (req.body.isDownvoted) {
-//     PostModel.update({
-//       _id: req.body._id
-//     }, {
-//       $pull: {
-//         votes: req.body.currentUserID
-//       }
-//     }, done)
-//   }
-// })
-
 /* Comment */
-app.post("/api/posts/:postId/comments", async (req, res) => {
-  const { postId } = req.params
-  const { content } = req.body
+app.post("/comment", async (req, res) => {
+  const currentUser = getCurrentUser(req)
+  const postId = req.query.postId
 
   try {
-    const post = await PostModel.findById(postId);
+    const post = await PostModel.findOne({_id: postId});
     if (!post) {
       return res.status(404).json({ message: "Post not found." })
     }
 
     const comment = new CommentModel ({
-      content: req.body.body,
+      content: req.query.body,
       createdAt: Date.now(),
-      commentorID: user.uid,
+      commentorID: currentUser.uid,
       votes: 0
     })
 

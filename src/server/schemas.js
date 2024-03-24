@@ -7,7 +7,7 @@ const UserSchema = new Schema({
   password: String,
   role: String
 })
-export const UserModel = mongoose.model("Users", UserSchema)
+export const UserModel = mongoose.model("Users", UserSchema, "Users")
 
 const CommentSchema = new Schema({
   body: String,
@@ -17,7 +17,7 @@ const CommentSchema = new Schema({
     ref: UserModel
   }
 })
-export const CommentModel = mongoose.model("Comments", CommentSchema)
+export const CommentModel = mongoose.model("Comments", CommentSchema, "Comments")
 
 const PostSchema = new Schema({
   userID: {
@@ -40,6 +40,6 @@ const PostSchema = new Schema({
     }
   }]
 })
-export const PostModel = mongoose.model("Posts", PostSchema)
+const PostModel = mongoose.model("Posts", PostSchema, "Posts")
 
 export default PostModel
