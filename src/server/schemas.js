@@ -26,11 +26,13 @@ const PostSchema = new Schema({
   },
   title: String,
   body: String,
-  votes: [{
-    voter: {
-      type: Schema.Types.ObjectId,
-      ref: UserModel,
-    }
+  upvotes: [{
+    type: Schema.Types.ObjectId,
+    ref: UserModel,
+  }],
+  downvotes: [{
+    type: Schema.Types.ObjectId,
+    ref: UserModel,
   }],
   createdAt: Date,
   comments: [{

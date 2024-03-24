@@ -97,7 +97,7 @@ const Profile = () => {
           content={post.body}
           username={post.userID.username}
           date={post.createdAt}
-          votes={post.votes}
+          upvotes={post.upvotes}
           isViewing={false}
           isOwner={isOwner}
         />

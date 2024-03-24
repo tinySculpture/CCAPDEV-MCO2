@@ -1,100 +1,184 @@
-import { useState } from "react";
+//styles
 import { IconContext } from "react-icons";
-import { BiUpvote, BiDownvote, BiComment } from "react-icons/bi";
-import { FaTrash, FaEdit  } from "react-icons/fa";
+import { BiUpvote, BiSolidUpvote, BiDownvote, BiSolidDownvote, BiComment } from "react-icons/bi";
+import { FaTrash, FaEdit } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
-import moment from "moment"
+import "../css/custom-styles.css";
 
-import "../css/custom-styles.css"
+// hooks
+import { useEffect, useState } from "react";
+import moment from "moment";
 import axios from "axios";
+import useAuthUser from 'react-auth-kit/hooks/useAuthUser';
 
-const Post = (
-  props: {
-    id: string,
-    username: string,
-    title: string,
-    content: string,
-    date: Date,
-    votes: any[],
-    isViewing?: boolean,
-    isOwner?: boolean,
-  }
-) => {
+// utils
+import http from "../../server/utils/axios";
+import UserType from "../../server/utils/UserType";
 
-  const [username, setUsername] = useState(props.username)
-  const [title, setTitle] = useState(props.title)
-  const [content, setContent] = useState(props.content)
-  const [isViewing, setIsViewing] = useState(props.isViewing || false)
-  const [isOwner, setIsOwner] = useState(props.isOwner || false)
-  const [voteCount, setVoteCount] = useState(props.votes.length)
-  const [isVoted, setIsVoted] = useState(false)
+const Post = (props: {
+  id: string;
+  username: string;
+  title: string;
+  content: string;
+  date: Date;
+  upvotes: any[];
+  isViewing?: boolean;
+  isOwner?: boolean;
+}) => {
+  const [username, setUsername] = useState(props.username);
+  const [title, setTitle] = useState(props.title);
+  const [content, setContent] = useState(props.content);
+  const [isViewing, setIsViewing] = useState(props.isViewing || false);
+  const [isOwner, setIsOwner] = useState(props.isOwner || false);
+  const [voteCount, setVoteCount] = useState(0);
+  const [isUpvoted, setIsUpvoted] = useState<boolean>(false);
+  const [isDownvoted, setIsDownvoted] = useState<boolean>(false);
+  
+  const auth = useAuthUser<UserType>()
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-  const updateCount = (count: number) => {
-    if (!isVoted) {
-      setVoteCount(voteCount + count)
-      setIsVoted(true)
+  useEffect(() => {
+    const getVotes = async () => {
+      try {
+        const response = await http.get(`/api/getvotes/${props.id}`)
+        setVoteCount(response.data[0].totalVotes)
+        
+        if (response.data[0].upvotes.includes(auth?.id)) {
+          setIsUpvoted(true);
+        }
+
+        if (response.data[0].downvotes.includes(auth?.id)) {
+          setIsDownvoted(true);
+        }
+
+      } catch (err) {
+        console.error(err)
+      }
     }
-  };
+    getVotes()
+  })
+
+  const checkIfUpvoted = () => {
+    if (isUpvoted) {
+      return <BiSolidUpvote onClick={() => handleVote(0)} />
+    }
+
+    return <BiUpvote onClick={() => handleVote(1)} />
+  }
+
+  const checkIfDownvoted = () => {
+    if (isDownvoted) {
+      return <BiSolidDownvote onClick={() => handleVote(0)} />
+    }
+
+    return <BiDownvote onClick={() => handleVote(-1)} />
+  }
+
+  const handleVote = async (count: number) => {
+    try {
+      const response = await http.put("/api/posts/updateupvote", {
+        count: count,
+        postID: props.id,
+        userID: auth?.id
+      })
+      // get upvote count
+      if (response.status === 200) {
+        console.log(isUpvoted, isDownvoted)
+        switch (count) {
+          case 1:
+            setIsUpvoted(true);
+            setIsDownvoted(false);
+            break;
+          case 0:
+            setIsUpvoted(false);
+            setIsDownvoted(false);
+            break;
+          case -1:
+            setIsUpvoted(false);
+            setIsDownvoted(true);
+            break;
+        }
+        setVoteCount(voteCount + count)
+      }
+    } catch (err) {
+      console.error(err)
+    }
+  }
 
   const checkIfViewing = () => {
     if (!isViewing) {
-      return <Link to={`/post/${username}/${props.id}`} style={{
-        position: "absolute",
-        width: "100%",
-        height: "100%",
-        inset: 0,
-        zIndex: 0
-      }}></Link>
+      return (
+        <Link
+          to={`/post/${username}/${props.id}`}
+          style={{
+            position: "absolute",
+            width: "100%",
+            height: "100%",
+            inset: 0,
+            zIndex: 0,
+          }}
+        ></Link>
+      );
     }
-  }
+  };
 
   const checkIfOwner = () => {
     if (!isOwner) {
-      return null
+      return null;
     }
 
     function handleEdit(): void {
-      navigate(`/edit/${props.id}`)
+      navigate(`/edit/${props.id}`);
     }
 
     function handleDelete(): void {
       if (confirm("Are you sure you want to delete your post forever?")) {
-        axios.delete("http://localhost:3000/post", {
-          params: {
-            username: username,
-            title: title
-          }
-        })
-        .then((res) => {
-          navigate(-1)
-        })
-        .catch((err) => {
-          console.log(err)
-        })
+        axios
+          .delete("http://localhost:3000/post", {
+            params: {
+              username: username,
+              title: title,
+            },
+          })
+          .then((res) => {
+            navigate(-1);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
       }
     }
 
-    return(
+    return (
       <div
         className="d-md-flex d-lg-flex justify-content-md-end justify-content-lg-end"
-        style={{ width: "100px", display: "flex"}}
+        style={{ width: "100px", display: "flex" }}
       >
         <IconContext.Provider value={{ size: "1em" }}>
-          <FaEdit  onClick={() => handleEdit()} style={{marginRight: "10px"}}/>
-          <FaTrash onClick={() => handleDelete()}/>
+          <FaEdit
+            onClick={() => handleEdit()}
+            style={{ marginRight: "10px" }}
+          />
+          <FaTrash onClick={() => handleDelete()} />
         </IconContext.Provider>
       </div>
-    )
-  }
+    );
+  };
 
   return (
     <div className="card" style={{ marginBottom: "10px" }}>
       <div className="card-body">
-
         {/* metadata */}
-        <div className="onTop" style={{ width: "auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div
+          className="onTop"
+          style={{
+            width: "auto",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
           <div>
             <Link to={`/user/${username}`} style={{ marginRight: 10 }}>
               {username}
@@ -105,7 +189,12 @@ const Post = (
         </div>
 
         {/* title and content */}
-        <h3 className="card-title" style={{...{"fontWeight": "bold", "marginBottom": "0"}}}>{title}</h3>
+        <h3
+          className="card-title"
+          style={{ ...{ fontWeight: "bold", marginBottom: "0" } }}
+        >
+          {title}
+        </h3>
         <p className="card-text">{content}</p>
 
         {/* like and comment */}
@@ -125,9 +214,9 @@ const Post = (
           >
             <IconContext.Provider value={{ size: "1.2em" }}>
               <div className="btnContainer">
-                <BiUpvote onClick={() => updateCount(1)} />
+                {checkIfUpvoted()}
                 <span style={{ userSelect: "none" }}>{voteCount}</span>
-                <BiDownvote onClick={() => updateCount(-1)} />
+                {checkIfDownvoted()}
               </div>
 
               <div className="btnContainer">
@@ -137,12 +226,11 @@ const Post = (
             </IconContext.Provider>
           </div>
         </div>
-        
-        {checkIfViewing()}
 
+        {checkIfViewing()}
       </div>
     </div>
   );
-}
+};
 
-export default Post
+export default Post;

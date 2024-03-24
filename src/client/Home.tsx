@@ -10,7 +10,6 @@ import axios from "axios";
 
 const Home = () => {
   const [posts, setPosts] = useState<any[]>([]);
-  const [currentUserID, setCurrentUserID] = useState("");
 
   useEffect(() => {
     const getPosts = async () => {
@@ -46,7 +45,7 @@ const Home = () => {
           content={post.body}
           username={post.userID.username}
           date={post.createdAt}
-          votes={post.votes}
+          upvotes={post.upvotes}
           isViewing={false}
         />
       );
