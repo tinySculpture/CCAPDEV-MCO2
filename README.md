@@ -28,18 +28,10 @@ __Notes__ _(Feel free to add stuff)_
 
 __TODO__
 
-- [ ] Sign-up page front-end
-- [ ] Import mongodb database
-- [ ] Add Functionality for each page
-
-post {
-  comments: [
-    uid: {
-      uid: ""
-      text: "",
-      userid: "",
-      createdAt: "",
-      votes: ""
-    }
-  ]
-}
+- [ ] Search post, user
+- [ ] Create post. The latest post must be placed at the top of the home page
+- [ ] Edit post, comment (and replies) 
+- [ ] Delete post, comment (and replies)
+- [ ] Report post, comment (and replies)
+- [ ] user dashboard - where a user can view the posts made & total amount of votes
+- [ ] admin dashboard - see the posts reported, delete reported posts which are deemed  inappropriate by the admin
