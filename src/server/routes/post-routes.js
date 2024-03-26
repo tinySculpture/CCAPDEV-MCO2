@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { PostModel } from "../schemas.js";
+import { CommentModel, PostModel } from "../schemas.js";
 import mongoose from "mongoose";
 const postRouter = Router();
 
-postRouter.get("/api/posts", async (req, res) => {
+postRouter.get("/api/posts/", async (req, res) => {
   try {
     const posts = await PostModel.find({})
       .populate("userID")
@@ -17,7 +17,21 @@ postRouter.get("/api/posts", async (req, res) => {
   }
 });
 
-postRouter.get("/api/getvotes/:id", async (req, res) => {
+postRouter.get("/api/post/:id", async (req, res) => {
+  const data = req.params;
+
+  try {
+    const post = await PostModel.findById(data.id)
+      .populate("userID")
+      .lean()
+      .exec();
+    res.send(post);
+  } catch (err) {
+    res.send(500);
+  }
+});
+
+postRouter.get("/api/post/:id/getvotes", async (req, res) => {
   const data = req.params;
 
   try {
@@ -26,9 +40,9 @@ postRouter.get("/api/getvotes/:id", async (req, res) => {
         _id: new mongoose.Types.ObjectId(data.id),
       })
       .project({
-				userID: "$userID",
-				upvotes: "$upvotes",
-				downvotes: "$downvotes",
+        userID: "$userID",
+        upvotes: "$upvotes",
+        downvotes: "$downvotes",
         totalVotes: {
           $subtract: [
             {
@@ -49,55 +63,81 @@ postRouter.get("/api/getvotes/:id", async (req, res) => {
   }
 });
 
-postRouter.put("/api/posts/updateupvote", async (req, res) => {
-	const data = req.body
-	let updateValue = {}
+postRouter.get("/api/post/:username/:postId", async (req, res) => {
+  const params = req.params;
 
-	try {
-		// check if adding an upvote
-		switch(data.count) {
-			case 1:
-				// user is upvoting
-				updateValue = {
-					$addToSet: {
-						upvotes: data.userID,
-					},
-					$pull: {
-						downvotes: data.userID,
-					}
-				}
-				break;
-			case 0:
-				// user is resetting upvote/downvote
-				updateValue = {
-					$pull: {
-						upvotes: data.userID,
-						downvotes: data.userID,
-					}
-				}
-				break;
-			case -1:
-				// user is downvoting
-				updateValue = {
-					$addToSet: {
-						downvotes: data.userID,
-					},
-					$pull: {
-						upvotes: data.userID,
-					}
-				}
-				break;
-		}
+  try {
+    const post = await PostModel.find({
+      _id: params.postId,
+    })
+      .populate({
+        path: "userID",
+        match: {
+          username: params.username,
+        },
+        select: "-password",
+      })
+      .populate({
+        path: "comments",
+      })
+      .lean()
+      .exec();
 
-		const post = await PostModel.findOneAndUpdate({
-			_id: data.postID,
-		}, updateValue).exec()
+    res.send(post);
+  } catch (err) {}
+});
 
-		console.log(post)
-		res.sendStatus(200)
-	} catch (err) {
-		console.error(err)
-	}
-})
+postRouter.put("/api/posts/updatevote", async (req, res) => {
+  const data = req.body;
+  let updateValue = {};
+
+  try {
+    // check if adding an upvote
+    switch (data.count) {
+      case 1:
+        // user is upvoting
+        updateValue = {
+          $addToSet: {
+            upvotes: data.userID,
+          },
+          $pull: {
+            downvotes: data.userID,
+          },
+        };
+        break;
+      case 0:
+        // user is resetting upvote/downvote
+        updateValue = {
+          $pull: {
+            upvotes: data.userID,
+            downvotes: data.userID,
+          },
+        };
+        break;
+      case -1:
+        // user is downvoting
+        updateValue = {
+          $addToSet: {
+            downvotes: data.userID,
+          },
+          $pull: {
+            upvotes: data.userID,
+          },
+        };
+        break;
+    }
+
+    const post = await PostModel.findOneAndUpdate(
+      {
+        _id: data.postID,
+      },
+      updateValue
+    ).exec();
+
+    res.sendStatus(200);
+  } catch (err) {
+    console.error(err);
+  }
+});
 
 export default postRouter;

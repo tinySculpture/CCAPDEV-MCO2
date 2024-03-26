@@ -1,14 +1,23 @@
 import MDEditor, { commands } from '@uiw/react-md-editor';
+import { Dispatch, SetStateAction, useState } from 'react';
+
+const cancelButton = {
+  marginRight: "10px",
+  cursor: "pointer"
+}
 
 // Markdown editor component
 const TextEditor = (props: {
-  editorText: string
-  setEditorText: React.Dispatch<React.SetStateAction<string>>,
-  placeholder: string
+  placeholder?: string,
+  handleSubmit: (comment: String) => void,
+  isReplying?: boolean | false,
+  setIsReplying?: Dispatch<SetStateAction<boolean>>
 }) => {
 
+  const [editorText, setEditorText] = useState("")
+
   const handleChange = (value: string) => {
-    props.setEditorText(value)
+    setEditorText(value)
   }
 
   return(
@@ -19,7 +28,7 @@ const TextEditor = (props: {
         marginBottom: "10px"
       }}
     >
-      <MDEditor value={props.editorText} onChange={(value) => { handleChange(value || "")}}
+      <MDEditor value={editorText} onChange={(value) => { handleChange(value || "")}}
         data-color-mode="dark"
         hideToolbar={false}
         preview="edit"
@@ -27,8 +36,10 @@ const TextEditor = (props: {
         textareaProps={{
           placeholder: props.placeholder
         }}
+        enableScroll={props.setIsReplying ? false : true}
+        height={props.setIsReplying ? 100 : 200}
         style={{
-          marginBottom: "10px"
+          marginBottom: "10px",
         }}
         commands={
           [
@@ -54,6 +65,27 @@ const TextEditor = (props: {
             
           ]}
       />
+        <div>
+          {
+            props.isReplying && 
+            <span
+            style={cancelButton}
+              onClick={() => props.setIsReplying ? props.setIsReplying(!props.isReplying) : null}
+            >
+              Cancel
+            </span>
+          }
+          <button
+            type="button"
+            className="btn btn-primary align-self-start"
+            onClick={() => {
+              props.handleSubmit(editorText);
+              setEditorText("");
+            }}
+          >
+            Submit
+          </button>
+        </div>
     </div>
   )
 }

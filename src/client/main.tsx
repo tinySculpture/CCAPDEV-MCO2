@@ -46,7 +46,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
 
             {/* Show a post */}
             <Route
-              path="/post/:username/:id"
+              path="/post/:username/:postId"
               element={<UserPost />}
             />
           </Route>

@@ -27,7 +27,7 @@ const Navbar = () => {
   }, [])
 
   return (
-    <nav className="navbar navbar-expand-md bg-body py-3">
+    <nav className="sticky-top navbar navbar-expand-md bg-body py-2">
       <div className="container">
         {/* Brand Icon and Text */}
         <NavLink className="navbar-brand d-flex align-items-center" to={isLoggedIn ? "/home" : "/"}>

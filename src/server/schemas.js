@@ -15,7 +15,18 @@ const CommentSchema = new Schema({
   commentorID: {
     type: Schema.Types.ObjectId,
     ref: UserModel
-  }
+  },
+  upvotes: [{
+    type: Schema.Types.ObjectId,
+    ref: UserModel,
+  }],
+  downvotes: [{
+    type: Schema.Types.ObjectId,
+    ref: UserModel,
+  }],
+})
+CommentSchema.add({
+  comments: [CommentSchema]
 })
 export const CommentModel = mongoose.model("comments", CommentSchema, "comments")
 
@@ -36,10 +47,8 @@ const PostSchema = new Schema({
   }],
   createdAt: Date,
   comments: [{
-    commentID: {
-      type: Schema.Types.ObjectId,
-      ref: CommentModel
-    }
+    type: Schema.Types.ObjectId,
+    ref: CommentModel
   }]
 })
 export const PostModel = mongoose.model("posts", PostSchema, "posts")

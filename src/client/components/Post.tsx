@@ -16,20 +16,18 @@ import http from "../../server/utils/axios";
 import UserType from "../../server/utils/UserType";
 
 const Post = (props: {
-  id: string;
-  username: string;
-  title: string;
-  content: string;
-  date: Date;
-  upvotes: any[];
+  id?: string,
   isViewing?: boolean;
   isOwner?: boolean;
 }) => {
-  const [username, setUsername] = useState(props.username);
-  const [title, setTitle] = useState(props.title);
-  const [content, setContent] = useState(props.content);
+  const [username, setUsername] = useState("");
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [date, setDate] = useState(new Date());
+
   const [isViewing, setIsViewing] = useState(props.isViewing || false);
   const [isOwner, setIsOwner] = useState(props.isOwner || false);
+
   const [voteCount, setVoteCount] = useState(0);
   const [isUpvoted, setIsUpvoted] = useState<boolean>(false);
   const [isDownvoted, setIsDownvoted] = useState<boolean>(false);
@@ -39,9 +37,31 @@ const Post = (props: {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const getPost = async () => {
+      try {
+        const response = await http.get(`/api/post/${props.id}`)
+        const data = response.data
+
+        setTitle(data.title)
+        setUsername(data.userID.username)
+        setContent(data.body)
+        setDate(data.date)
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          if (err.response?.status === 500) {
+            console.error("Database error.");
+          }
+        } else {
+          console.error(err);
+        }
+      }
+    }
+
+    getPost()
+
     const getVotes = async () => {
       try {
-        const response = await http.get(`/api/getvotes/${props.id}`)
+        const response = await http.get(`/api/post/${props.id}/getvotes`)
         setVoteCount(response.data[0].totalVotes)
         
         if (response.data[0].upvotes.includes(auth?.id)) {
@@ -56,6 +76,7 @@ const Post = (props: {
         console.error(err)
       }
     }
+
     getVotes()
   })
 
@@ -77,7 +98,7 @@ const Post = (props: {
 
   const handleVote = async (count: number) => {
     try {
-      const response = await http.put("/api/posts/updateupvote", {
+      const response = await http.put("/api/posts/updatevote", {
         count: count,
         postID: props.id,
         userID: auth?.id
@@ -183,7 +204,7 @@ const Post = (props: {
             <Link to={`/user/${username}`} style={{ marginRight: 10 }}>
               {username}
             </Link>
-            <span>{moment(props.date).format("MMMM D, YYYY")}</span>
+            <span>{moment(date).format("MMMM D, YYYY")}</span>
           </div>
           {checkIfOwner()}
         </div>

@@ -41,11 +41,6 @@ const Home = () => {
         <Post
           key={post._id}
           id={post._id}
-          title={post.title}
-          content={post.body}
-          username={post.userID.username}
-          date={post.createdAt}
-          upvotes={post.upvotes}
           isViewing={false}
         />
       );

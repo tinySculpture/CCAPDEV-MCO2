@@ -8,6 +8,7 @@ import "dotenv/config";
 
 import userRouter from "./routes/user-routes.js";
 import postRouter from "./routes/post-routes.js";
+import commentRouter from "./routes/comment-routes.js";
 
 
 const PORT = 3000;
@@ -23,6 +24,7 @@ mongoose.connect(db_url);
 
 app.use(userRouter)
 app.use(postRouter)
+app.use(commentRouter)
 
 // const getCurrentUser = (req) => {
 //   const token = req.cookies.token;
