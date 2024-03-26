@@ -105,7 +105,6 @@ const Post = (props: {
       })
       // get upvote count
       if (response.status === 200) {
-        console.log(isUpvoted, isDownvoted)
         switch (count) {
           case 1:
             setIsUpvoted(true);
@@ -120,7 +119,7 @@ const Post = (props: {
             setIsDownvoted(true);
             break;
         }
-        setVoteCount(voteCount + count)
+        setVoteCount(response.data.votes)
       }
     } catch (err) {
       console.error(err)
@@ -166,7 +165,7 @@ const Post = (props: {
             navigate(-1);
           })
           .catch((err) => {
-            console.log(err);
+            console.error(err);
           });
       }
     }

@@ -45,11 +45,32 @@ const Comment = (props: { id: string }) => {
     };
 
     getReplies();
+
+    const getVotes = async () => {
+      try {
+        const response = await http.get(`/api/comment/${props.id}/getvotes`)
+        const data = response.data[0]
+        setVoteCount(data.totalVotes)
+        
+        if (data.upvotes.includes(auth?.id)) {
+          setIsUpvoted(true);
+        }
+
+        if (data.downvotes.includes(auth?.id)) {
+          setIsDownvoted(true);
+        }
+
+      } catch (err) {
+        console.error(err)
+      }
+    }
+
+    getVotes()
   }, []);
 
   const handleSubmit = async (reply: String) => {
     if (reply === "") {
-      return
+      return;
     }
 
     try {
@@ -58,25 +79,55 @@ const Comment = (props: { id: string }) => {
         userId: auth?.id,
         reply: reply,
       });
-      setReplies([...replies, response.data])
+      setReplies([...replies, response.data]);
       setIsReplying(false);
     } catch (err) {}
   };
 
   const checkIfUpvoted = () => {
     if (isUpvoted) {
-      return <BiSolidUpvote />;
+      return <BiSolidUpvote onClick={() => handleVote(0)} />;
     }
 
-    return <BiUpvote />;
+    return <BiUpvote onClick={() => handleVote(1)} />;
   };
 
   const checkIfDownvoted = () => {
     if (isDownvoted) {
-      return <BiSolidDownvote />;
+      return <BiSolidDownvote onClick={() => handleVote(0)} />;
     }
 
-    return <BiDownvote />;
+    return <BiDownvote onClick={() => handleVote(-1)} />;
+  };
+
+  const handleVote = async (count: number) => {
+    try {
+      const response = await http.put("/api/comments/updatevote", {
+        count: count,
+        commentID: props.id,
+        userID: auth?.id,
+      });
+      // get upvote count
+      if (response.status === 200) {
+        switch (count) {
+          case 1:
+            setIsUpvoted(true);
+            setIsDownvoted(false);
+            break;
+          case 0:
+            setIsUpvoted(false);
+            setIsDownvoted(false);
+            break;
+          case -1:
+            setIsUpvoted(false);
+            setIsDownvoted(true);
+            break;
+        }
+        setVoteCount(response.data.votes);
+      }
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
@@ -122,9 +173,7 @@ const Comment = (props: { id: string }) => {
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              cursor: "pointer",
             }}
-            onClick={() => setIsReplying(!isReplying)}
           >
             <IconContext.Provider value={{ size: "1.2em" }}>
               <div className="btnContainer">
@@ -132,7 +181,12 @@ const Comment = (props: { id: string }) => {
                 <span style={{ userSelect: "none" }}>{voteCount}</span>
                 {checkIfDownvoted()}
               </div>
-              <div className="btnContainer">
+
+              <div
+                style={{ cursor: "pointer" }}
+                className="btnContainer"
+                onClick={() => setIsReplying(!isReplying)}
+              >
                 <BiComment />
                 <span>Reply</span>
               </div>

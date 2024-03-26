@@ -131,10 +131,17 @@ postRouter.put("/api/posts/updatevote", async (req, res) => {
       {
         _id: data.postID,
       },
-      updateValue
+      updateValue,
+      {
+        returnDocument: "after",
+      }
     ).exec();
 
-    res.sendStatus(200);
+    res.send(
+      JSON.stringify({
+        votes: post.upvotes.length - post.downvotes.length,
+      })
+    );
   } catch (err) {
     console.error(err);
   }
