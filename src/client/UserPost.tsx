@@ -82,7 +82,7 @@ const UserPost = () => {
           key={postId}
           id={postId}
           isViewing={true}
-          isOwner={isOwner}
+          isOwner={isOwner || false}
         />
         <TextEditor
           placeholder="Add a comment..."
