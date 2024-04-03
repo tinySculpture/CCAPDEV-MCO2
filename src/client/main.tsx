@@ -2,65 +2,62 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 
 import Home from "./Home";
-import Index from "./Index";
-
-import "bootstrap/dist/css/bootstrap.css";
-import "./scss/main.scss";
-
-import { BrowserRouter, Route, Routes } from "react-router-dom";
 import UserPost from "./UserPost.jsx";
 import Profile from "./Profile";
 import Login from "./Login";
 import Signup from "./Signup";
 import CreatePost from "./CreatePost";
+import EditPost from "./EditPost";
 
-export class PostContent {
-  id: number;
-  title: string;
-  content: string;
-  username: string;
-  voteCount: number = 0;
+import "bootstrap/dist/css/bootstrap.css";
+import "./scss/main.scss";
 
-  constructor(id: number, title: string, content: string, username: string) {
-    this.id = id
-    this.title = title
-    this.content = content
-    this.username = username
-  }
-}
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import AuthProvider from "react-auth-kit/AuthProvider";
+import store from "../server/utils/authStore";
+import AuthOutlet from "@auth-kit/react-router/AuthOutlet";
+import Admin from "./Admin";
 
-var postList: PostContent[] = []
-
-for (let i = 0; i < 5; i++) {
-  postList.push(new PostContent(i, `Post Title A${i + 1}`, "Post Content", `@username${i}`))
-}
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <Routes>
-        {/* Main path */}
-        <Route path="/" element={<Index />} />
-        
-        <Route path="/home" element={<Home postList={postList} />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
+    <AuthProvider store={store}>
+      <BrowserRouter>
+        <Routes>
 
-        <Route path="/create" element={<CreatePost />} />
-        
-        {/* Show a user */}
-        <Route
-          path="/user/:username"
-          element={<Profile />}
-        />
-        
-        {/* Show a post */}
-        <Route
-          path="/post/:username/:title"
-          element={<UserPost />}
-        />
+          <Route path="/" element={<Login />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
 
-      </Routes>
-    </BrowserRouter>
+          {/* Protected routes */}
+          <Route element={<AuthOutlet fallbackPath="/login" />}>
+            <Route path="/home" element={<Home />} />
+            <Route path="/create" element={<CreatePost />} />
+
+            <Route
+              path="/edit/:id"
+              element={<EditPost />}
+            />
+
+            {/* Show a user */}
+            <Route
+              path="/user/:username"
+              element={<Profile />}
+            />
+
+            {/* Show a post */}
+            <Route
+              path="/post/:username/:postId"
+              element={<UserPost />}
+            />
+
+            <Route 
+              path="/admin"
+              element={<Admin />}
+            />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   </React.StrictMode>
 );

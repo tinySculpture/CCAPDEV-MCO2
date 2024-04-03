@@ -1,28 +1,53 @@
-import { useState } from "react";
 import MDEditor, { commands } from '@uiw/react-md-editor';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+
+const cancelButton = {
+  marginRight: "10px",
+  cursor: "pointer"
+}
 
 // Markdown editor component
-const TextEditor = () => {
+const TextEditor = (props: {
+  placeholder?: string,
+  handleSubmit: (comment: String) => void,
+  isReplying?: boolean | false,
+  setIsReplying?: Dispatch<SetStateAction<boolean>>
+  editorText?: string
+}) => {
 
   const [editorText, setEditorText] = useState("")
+
+  useEffect(() => {
+    if (props.editorText) {
+      setEditorText(props.editorText);
+    }
+    console.log(props.editorText)
+  }, [props.editorText])
+
+  const handleChange = (value: string) => {
+    setEditorText(value)
+  }
 
   return(
     <div
       className="card"
       style={{
-        padding: "20px"
+        padding: "20px",
+        marginBottom: "10px"
       }}
     >
-      <MDEditor value={editorText} onChange={() => {setEditorText}}
+      <MDEditor value={editorText} onChange={(value) => { handleChange(value || "")}}
         data-color-mode="dark"
         hideToolbar={false}
         preview="edit"
         visibleDragbar={false}
         textareaProps={{
-          placeholder: "Add a comment..."
+          placeholder: props.placeholder
         }}
+        enableScroll={props.setIsReplying ? false : true}
+        height={props.setIsReplying ? 100 : 200}
         style={{
-          marginBottom: "10px"
+          marginBottom: "10px",
         }}
         commands={
           [
@@ -48,7 +73,27 @@ const TextEditor = () => {
             
           ]}
       />
-      <button type="button" className="btn btn-primary align-self-start">Submit</button>
+        <div>
+          {
+            props.isReplying && 
+            <span
+            style={cancelButton}
+              onClick={() => props.setIsReplying ? props.setIsReplying(!props.isReplying) : null}
+            >
+              Cancel
+            </span>
+          }
+          <button
+            type="button"
+            className="btn btn-primary align-self-start"
+            onClick={() => {
+              props.handleSubmit(editorText);
+              setEditorText("");
+            }}
+          >
+            Submit
+          </button>
+        </div>
     </div>
   )
 }

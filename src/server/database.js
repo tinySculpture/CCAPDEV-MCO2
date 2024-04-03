@@ -1,15 +1,8 @@
-import mongoose from "mongoose";
+import { MongoClient } from "mongodb"
+import "dotenv/config";
+export const db_url = process.env.DB_URL
 
-export const db_url = "mongodb+srv://josiah:josiahmari1@edurevs.4cnhyvi.mongodb.net/"
-
-
-const connectDB = () => {
-  mongoose.set("strictQuery", true)
-  mongoose.connect(db_url, {}).then(() => {
-    console.log("Connected to database.")
-  }).catch((err) => {
-    console.log("Failed to connect to database.")
-  })
-}
-
-export default connectDB
+const client = new MongoClient(db_url)
+let connection = await client.connect();
+let db = connection.db("prof2pick")
+export default db
