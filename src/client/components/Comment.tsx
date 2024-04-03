@@ -64,7 +64,6 @@ const Comment = (props: { id: string }) => {
         console.error(err)
       }
     }
-
     getVotes()
   }, []);
 
@@ -158,7 +157,7 @@ const Comment = (props: { id: string }) => {
           </div>
         </div>
 
-        <Markdown>{content}</Markdown>
+        <Markdown className="markdown">{content}</Markdown>
 
         {/* like and comment */}
         <div

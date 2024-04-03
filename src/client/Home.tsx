@@ -7,9 +7,12 @@ import { useEffect, useState } from "react";
 // utils
 import http from "../server/utils/axios";
 import axios from "axios";
+import useAuthUser from "react-auth-kit/hooks/useAuthUser";
+import UserType from "../server/utils/UserType";
 
 const Home = () => {
   const [posts, setPosts] = useState<any[]>([]);
+  const auth = useAuthUser<UserType>();
 
   useEffect(() => {
     const getPosts = async () => {
@@ -42,6 +45,7 @@ const Home = () => {
           key={post._id}
           id={post._id}
           isViewing={false}
+          isOwner={post.userID._id == auth?.id}
         />
       );
     });

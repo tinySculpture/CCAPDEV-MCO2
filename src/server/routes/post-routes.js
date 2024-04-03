@@ -3,7 +3,7 @@ import { CommentModel, PostModel } from "../schemas.js";
 import mongoose from "mongoose";
 const postRouter = Router();
 
-postRouter.get("/api/posts/", async (req, res) => {
+postRouter.get("/api/posts", async (req, res) => {
   try {
     const posts = await PostModel.find({})
       .populate("userID")
@@ -17,6 +17,48 @@ postRouter.get("/api/posts/", async (req, res) => {
   }
 });
 
+postRouter.get("/api/posts/reported", async (req, res) => {
+  try {
+    const posts = await PostModel.find({ reports: { $ne: [] } });
+    const reportCounts = await PostModel.aggregate()
+      .match({
+        reports: { $ne: [] },
+      })
+      .project({
+        _id: 1,
+        reportsCount: {
+          $size: "$reports"
+        }
+      });
+      
+    res.send(JSON.stringify({
+      posts: posts,
+      reportCounts: reportCounts
+    }));
+  } catch (err) {
+    res.sendStatus(500);
+  }
+});
+
+postRouter.post("/api/create", async (req, res) => {
+  const data = req.body;
+
+  const newPost = new PostModel({
+    title: data.title,
+    body: data.body,
+    userID: data.id,
+    createdAt: new Date(),
+    comments: [],
+    upvotes: [data.id],
+    downvotes: [],
+  });
+
+  try {
+    await newPost.save();
+    res.sendStatus(200);
+  } catch (err) {}
+});
+
 postRouter.get("/api/post/:id", async (req, res) => {
   const data = req.params;
 
@@ -27,7 +69,22 @@ postRouter.get("/api/post/:id", async (req, res) => {
       .exec();
     res.send(post);
   } catch (err) {
-    res.send(500);
+    res.sendStatus(500);
+  }
+});
+
+postRouter.patch("/api/post/:id", async (req, res) => {
+  const params = req.params;
+  const data = req.body;
+
+  try {
+    const post = await PostModel.findByIdAndUpdate(params.id, {
+      title: data.title,
+      body: data.body,
+    });
+    res.sendStatus(200);
+  } catch (err) {
+    res.sendStatus(500);
   }
 });
 
@@ -57,6 +114,49 @@ postRouter.get("/api/post/:id/getvotes", async (req, res) => {
       .exec();
 
     res.send(votes);
+  } catch (err) {
+    console.error(err);
+    res.sendStatus(500);
+  }
+});
+
+postRouter.put("/api/post/:id/report", async (req, res) => {
+  const params = req.params;
+  const data = req.body;
+  try {
+    const post = await PostModel.findOne({
+      _id: params.id,
+      reports: {
+        $in: [data.userID],
+      },
+    });
+
+    let update = {};
+
+    if (!post) {
+      // add user to reports
+      update = {
+        $addToSet: {
+          reports: data.userID,
+        },
+      };
+    } else {
+      // remove user from reports
+      update = {
+        $pull: {
+          reports: data.userID,
+        },
+      };
+    }
+
+    const updatedPost = await PostModel.findByIdAndUpdate(
+      {
+        _id: params.id,
+      },
+      update
+    );
+
+    res.sendStatus(200);
   } catch (err) {
     console.error(err);
     res.sendStatus(500);
@@ -142,6 +242,16 @@ postRouter.put("/api/posts/updatevote", async (req, res) => {
         votes: post.upvotes.length - post.downvotes.length,
       })
     );
+  } catch (err) {
+    console.error(err);
+  }
+});
+
+postRouter.delete("/api/post/:id", async (req, res) => {
+  const data = req.params;
+  try {
+    const post = await PostModel.findByIdAndDelete(data.id).exec();
+    res.sendStatus(200);
   } catch (err) {
     console.error(err);
   }

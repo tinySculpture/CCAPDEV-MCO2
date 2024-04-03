@@ -1,5 +1,5 @@
 import MDEditor, { commands } from '@uiw/react-md-editor';
-import { Dispatch, SetStateAction, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 
 const cancelButton = {
   marginRight: "10px",
@@ -12,9 +12,17 @@ const TextEditor = (props: {
   handleSubmit: (comment: String) => void,
   isReplying?: boolean | false,
   setIsReplying?: Dispatch<SetStateAction<boolean>>
+  editorText?: string
 }) => {
 
   const [editorText, setEditorText] = useState("")
+
+  useEffect(() => {
+    if (props.editorText) {
+      setEditorText(props.editorText);
+    }
+    console.log(props.editorText)
+  }, [props.editorText])
 
   const handleChange = (value: string) => {
     setEditorText(value)

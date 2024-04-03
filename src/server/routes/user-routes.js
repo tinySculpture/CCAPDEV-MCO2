@@ -7,6 +7,7 @@ const { sign } = jwt;
 
 import { PostModel, UserModel } from "../schemas.js";
 import "dotenv/config";
+import mongoose from "mongoose";
 
 userRouter.post("/api/login", async (req, res) => {
   const data = req.body;
@@ -145,6 +146,44 @@ userRouter.get("/api/user/:username", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.sendStatus(404);
+  }
+});
+
+userRouter.get("/api/user/:id/getvotes", async (req, res) => {
+  const data = req.params;
+  try {
+    const userVotes = await UserModel.aggregate()
+      .match({ _id: new mongoose.Types.ObjectId(data.id) })
+      .lookup({
+        from: "posts",
+        localField: "_id",
+        foreignField: "userID",
+        as: "userPosts",
+      })
+      .unwind("$userPosts")
+      .group({
+        _id: "$_id",
+        totalUpvotes: {
+          $sum: {
+            $size: "$userPosts.upvotes",
+          },
+        },
+        totalDownvotes: {
+          $sum: {
+            $size: "$userPosts.downvotes",
+          },
+        },
+      })
+      .project({
+        _id: 0,
+        totalUpvotes: 1,
+        totalDownvotes: 1,
+      })
+      .exec();
+
+    res.send(userVotes);
+  } catch (err) {
+    console.error(err);
   }
 });
 

@@ -49,6 +49,10 @@ const PostSchema = new Schema({
   comments: [{
     type: Schema.Types.ObjectId,
     ref: CommentModel
+  }],
+  reports: [{
+    type: Schema.Types.ObjectId,
+    ref: UserModel,
   }]
 })
 export const PostModel = mongoose.model("posts", PostSchema, "posts")

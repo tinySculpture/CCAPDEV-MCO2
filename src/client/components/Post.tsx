@@ -1,7 +1,15 @@
 //styles
 import { IconContext } from "react-icons";
-import { BiUpvote, BiSolidUpvote, BiDownvote, BiSolidDownvote, BiComment } from "react-icons/bi";
-import { FaTrash, FaEdit } from "react-icons/fa";
+import {
+  BiUpvote,
+  BiSolidUpvote,
+  BiDownvote,
+  BiSolidDownvote,
+  BiComment,
+  BiDotsHorizontalRounded,
+  BiXCircle,
+} from "react-icons/bi";
+import { FaTrash, FaEdit, FaExclamationCircle } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import "../css/custom-styles.css";
 
@@ -9,43 +17,46 @@ import "../css/custom-styles.css";
 import { useEffect, useState } from "react";
 import moment from "moment";
 import axios from "axios";
-import useAuthUser from 'react-auth-kit/hooks/useAuthUser';
+import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 
 // utils
 import http from "../../server/utils/axios";
 import UserType from "../../server/utils/UserType";
+import Markdown from "react-markdown";
 
 const Post = (props: {
-  id?: string,
+  id?: string;
   isViewing?: boolean;
-  isOwner?: boolean;
+  isOwner: boolean;
+  isAdmin? : boolean;
 }) => {
   const [username, setUsername] = useState("");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [date, setDate] = useState(new Date());
+  const [date, setDate] = useState<Date>();
 
   const [isViewing, setIsViewing] = useState(props.isViewing || false);
   const [isOwner, setIsOwner] = useState(props.isOwner || false);
+  const [isSetting, setIsSetting] = useState(false);
 
   const [voteCount, setVoteCount] = useState(0);
   const [isUpvoted, setIsUpvoted] = useState<boolean>(false);
   const [isDownvoted, setIsDownvoted] = useState<boolean>(false);
-  
-  const auth = useAuthUser<UserType>()
+
+  const auth = useAuthUser<UserType>();
 
   const navigate = useNavigate();
 
   useEffect(() => {
     const getPost = async () => {
       try {
-        const response = await http.get(`/api/post/${props.id}`)
-        const data = response.data
+        const response = await http.get(`/api/post/${props.id}`);
+        const data = response.data;
 
-        setTitle(data.title)
-        setUsername(data.userID.username)
-        setContent(data.body)
-        setDate(data.date)
+        setTitle(data.title);
+        setUsername(data.userID.username);
+        setContent(data.body);
+        setDate(data.createdAt);
       } catch (err) {
         if (axios.isAxiosError(err)) {
           if (err.response?.status === 500) {
@@ -55,15 +66,15 @@ const Post = (props: {
           console.error(err);
         }
       }
-    }
+    };
 
-    getPost()
+    getPost();
 
     const getVotes = async () => {
       try {
-        const response = await http.get(`/api/post/${props.id}/getvotes`)
-        setVoteCount(response.data[0].totalVotes)
-        
+        const response = await http.get(`/api/post/${props.id}/getvotes`);
+        setVoteCount(response.data[0].totalVotes);
+
         if (response.data[0].upvotes.includes(auth?.id)) {
           setIsUpvoted(true);
         }
@@ -71,38 +82,37 @@ const Post = (props: {
         if (response.data[0].downvotes.includes(auth?.id)) {
           setIsDownvoted(true);
         }
-
       } catch (err) {
-        console.error(err)
+        console.error(err);
       }
-    }
+    };
 
-    getVotes()
-  })
+    getVotes();
+  });
 
   const checkIfUpvoted = () => {
     if (isUpvoted) {
-      return <BiSolidUpvote onClick={() => handleVote(0)} />
+      return <BiSolidUpvote onClick={() => handleVote(0)} />;
     }
 
-    return <BiUpvote onClick={() => handleVote(1)} />
-  }
+    return <BiUpvote onClick={() => handleVote(1)} />;
+  };
 
   const checkIfDownvoted = () => {
     if (isDownvoted) {
-      return <BiSolidDownvote onClick={() => handleVote(0)} />
+      return <BiSolidDownvote onClick={() => handleVote(0)} />;
     }
 
-    return <BiDownvote onClick={() => handleVote(-1)} />
-  }
+    return <BiDownvote onClick={() => handleVote(-1)} />;
+  };
 
   const handleVote = async (count: number) => {
     try {
       const response = await http.put("/api/posts/updatevote", {
         count: count,
         postID: props.id,
-        userID: auth?.id
-      })
+        userID: auth?.id,
+      });
       // get upvote count
       if (response.status === 200) {
         switch (count) {
@@ -119,12 +129,12 @@ const Post = (props: {
             setIsDownvoted(true);
             break;
         }
-        setVoteCount(response.data.votes)
+        setVoteCount(response.data.votes);
       }
     } catch (err) {
-      console.error(err)
+      console.error(err);
     }
-  }
+  };
 
   const checkIfViewing = () => {
     if (!isViewing) {
@@ -143,44 +153,70 @@ const Post = (props: {
     }
   };
 
-  const checkIfOwner = () => {
-    if (!isOwner) {
-      return null;
-    }
+  const handleSetting = () => {
+    setIsSetting(!isSetting);
+  };
 
-    function handleEdit(): void {
-      navigate(`/edit/${props.id}`);
-    }
+  const handleEdit = () => {
+    navigate(`/edit/${props.id}`);
+  };
 
-    function handleDelete(): void {
-      if (confirm("Are you sure you want to delete your post forever?")) {
-        axios
-          .delete("http://localhost:3000/post", {
-            params: {
-              username: username,
-              title: title,
-            },
-          })
-          .then((res) => {
-            navigate(-1);
-          })
-          .catch((err) => {
-            console.error(err);
-          });
+  const handleDelete = async () => {
+    if (confirm("Are you sure you want to delete your post forever?")) {
+      try {
+        const response = await http.delete(`/api/post/${props.id}`);
+        if (response.status === 200) {
+          navigate(0);
+        }
+      } catch (err) {
+        console.error(err);
       }
     }
+  };
 
+  const handleReport = async () => {
+    try {
+      const response = await http.put(`/api/post/${props.id}/report`, {
+        userID: auth?.id
+      })
+
+      alert("The post has been reported! Thank you for helping us.");
+    } catch (err) {
+
+    }
+  }
+
+  const getSettings = () => {
     return (
-      <div
-        className="d-md-flex d-lg-flex justify-content-md-end justify-content-lg-end"
-        style={{ width: "100px", display: "flex" }}
-      >
-        <IconContext.Provider value={{ size: "1em" }}>
-          <FaEdit
-            onClick={() => handleEdit()}
-            style={{ marginRight: "10px" }}
-          />
-          <FaTrash onClick={() => handleDelete()} />
+      <div className="postSetting">
+        <IconContext.Provider value={{ size: "0.9em" }}>
+          {!isOwner && (
+            <div id="report" onClick={() => handleReport()}>
+              <FaExclamationCircle />
+              <span>Report</span>
+            </div>
+          )}
+
+          {isOwner && (
+            <div id="edit" onClick={() => handleEdit()}>
+              <FaEdit />
+              <span>Edit</span>
+            </div>
+          )}
+
+          {isOwner && (
+            <div id="delete" onClick={() => handleDelete()}>
+              <FaTrash />
+              <span>Delete</span>
+            </div>
+          )}
+
+          {props.isAdmin && (
+            <div id="delete" onClick={() => handleDelete()}>
+              <BiXCircle />
+              <span style={{width: "100px"}}>Admin Delete</span>
+            </div>
+          )}
         </IconContext.Provider>
       </div>
     );
@@ -205,7 +241,20 @@ const Post = (props: {
             </Link>
             <span>{moment(date).format("MMMM D, YYYY")}</span>
           </div>
-          {checkIfOwner()}
+          <div
+            className="d-md-flex d-lg-flex justify-content-md-end justify-content-lg-end"
+            style={{ width: "100px", display: "flex" }}
+          >
+
+            <IconContext.Provider value={{ size: "1em" }}>
+              <BiDotsHorizontalRounded
+                onClick={() => handleSetting()}
+                style={{ cursor: "pointer" }}
+              />
+            </IconContext.Provider>
+
+            {isSetting && getSettings()}
+          </div>
         </div>
 
         {/* title and content */}
@@ -215,7 +264,8 @@ const Post = (props: {
         >
           {title}
         </h3>
-        <p className="card-text">{content}</p>
+
+        <Markdown className="card-text">{content}</Markdown>
 
         {/* like and comment */}
         <div

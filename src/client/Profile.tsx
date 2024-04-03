@@ -8,7 +8,7 @@ import Navbar from "./components/Navbar";
 import Post from "./components/Post";
 
 // hooks
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import useAuthUser from "react-auth-kit/hooks/useAuthUser";
 import useSignOut from "react-auth-kit/hooks/useSignOut";
@@ -40,12 +40,13 @@ const Profile = () => {
         });
         const user = response.data.user;
         setFullname(user.displayName);
-
         setPosts(response.data.posts);
 
         if (auth?.id === user._id) {
           setIsOwner(true);
         }
+
+        getVotes(user._id);
       } catch (err) {
         if (axios.isAxiosError(err)) {
           if (err.response?.status === 404) {
@@ -56,6 +57,19 @@ const Profile = () => {
         } else {
           console.error(err);
         }
+      }
+    };
+
+    const getVotes = async (id: String) => {
+      try {
+        const response = await http.get(`/api/user/${id}/getvotes`);
+        if (response.data.length === 0) {
+          return;
+        }
+        const data = response.data[0];
+        setTotalVotes(data.totalUpvotes - data.totalDownvotes);
+      } catch (err) {
+        console.error(err)
       }
     };
 
@@ -71,14 +85,21 @@ const Profile = () => {
     if (!isOwner) return null;
 
     return (
-      <button
-        type="button"
-        className="btn btn-danger align-self-start"
-        onClick={handleLogout}
-        style={{ marginTop: "15px" }}
-      >
-        Logout
-      </button>
+      <div style={{
+        display: "flex",
+        flexDirection: "column",
+      }}>
+        <button
+          type="button"
+          className="btn btn-danger align-self-start"
+          onClick={handleLogout}
+          style={{ marginTop: "15px" }}
+          >
+          Logout
+        </button>
+
+        {auth?.role === "admin" && <Link to="/admin">Admin Dashboard</Link>}
+      </div>
     );
   };
 
@@ -109,7 +130,7 @@ const Profile = () => {
       <div className="container">
         <div className="row">
           <div className="col-md-4 col-lg-3">
-            <div className="card">
+            <div className="card position-fixed" style={{ width: "260px" }}>
               <div className="card-body">
                 <img src={userPfp} width="100px" />
                 <h6
