@@ -26,6 +26,14 @@ __Notes__ _(Feel free to add stuff)_
 
 __TODO__
 
+- [ ] Search post, user
+- [ ] Create post. The latest post must be placed at the top of the home page
+- [ ] Edit post, comment (and replies) 
+- [ ] Delete post, comment (and replies)
+- [ ] Report post, comment (and replies)
+- [ ] user dashboard - where a user can view the posts made & total amount of votes
+- [ ] admin dashboard - see the posts reported, delete reported posts which are deemed  inappropriate by the admin
 - [ ] Sign-up page front-end, field validation
+- [ ] log-in validation (password: salt and hash in mongodb, password and username validation)
 - [ ] Import mongodb database
 - [ ] Add Functionality for each page
